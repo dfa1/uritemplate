@@ -16,6 +16,8 @@
   (map param->keyword (re-seq #"\{\w+\}" template)))
 
 (defn url-template [template]
+  "Returns a new url-template fn that accepts one keyword argument
+   for each uri-parameter."
   (let [placeholders (extract-params template)]
     (fn [& more]
       (let [params (apply hash-map more)]

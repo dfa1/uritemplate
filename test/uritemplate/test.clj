@@ -2,7 +2,9 @@
   (:use [uritemplate])
   (:use [clojure.test]))
 
-(testing "param to keyword conversion" 
+;; abusing testing macro
+
+(testing "uri parameter to keyword conversion" 
 
   (deftest parameter
     (is (= :foo (param->keyword "{foo}"))))
@@ -21,6 +23,7 @@
 
   )
 
+
 (testing "keyword to uri parameter"
 
   (deftest accept-keyword
@@ -32,6 +35,7 @@
   (deftest refuse-nil
     (is (thrown? AssertionError (keyword->param nil)))))
 
+
 (testing "extract parameters"
 
   (deftest extract-parameter
@@ -39,8 +43,9 @@
 
   (deftest multiple-parameters-in-order
     (is (= (list :foo :bar) (extract-params "http://host/{foo}/{bar}")))))
-  
-(testing "level 1 url templates" 
+
+
+(testing "level 1 uri templates" 
   
   (deftest one-parameter
     (let [template (url-template "http://example.com/users/{nick}")]
