@@ -18,6 +18,7 @@
 (defn url-template [template]
   "Returns a new url-template fn that accepts one keyword argument
    for each uri-parameter."
+  (assert (not-empty template))
   (let [placeholders (extract-params template)]
     (fn [& more]
       (let [params (apply hash-map more)]

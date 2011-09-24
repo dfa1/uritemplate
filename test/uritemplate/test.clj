@@ -46,13 +46,22 @@
 
 
 (testing "level 1 uri templates" 
-  
-  (deftest one-parameter
+
+  (deftest refuse-nil-template
+    (is (thrown? AssertionError (url-template nil))))
+
+  (deftest refuse-empty-template
+    (is (thrown? AssertionError (url-template ""))))
+
+  (deftest accept-constant-template
+    (is (= "http://example.com" ((url-template "http://example.com")))))
+
+  (deftest one-parameter-template
     (let [template (url-template "http://example.com/users/{nick}")]
       (is (= "http://example.com/users/dfa"
              (template :nick "dfa")))))
 
-  (deftest two-parameters
+  (deftest two-parameters-template
     (let [template (url-template "http://example.com/{nick}/{age}")]
       (is (= "http://example.com/dfa/30"
              (template :nick "dfa" :age "30"))))))
