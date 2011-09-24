@@ -2,7 +2,7 @@
   (:use [uritemplate])
   (:use [clojure.test]))
 
-;; abusing testing macro
+;; abusing testing macro...
 
 (testing "uri parameter to keyword conversion" 
 
@@ -61,7 +61,17 @@
       (is (= "http://example.com/users/dfa"
              (template :nick "dfa")))))
 
-  (deftest two-parameters-template
-    (let [template (url-template "http://example.com/{nick}/{age}")]
-      (is (= "http://example.com/dfa/30"
-             (template :nick "dfa" :age "30"))))))
+  (deftest one-parameter-multiple-time
+    (let [template (url-template "http://{nick}.example.com/{nick}")]
+      (is (= "http://dfa.example.com/dfa"
+             (template :nick "dfa")))))
+
+  (deftest multiple-parameters-template
+    (let [template (url-template "http://example.com/{role}/{nick}")]
+      (is (= "http://example.com/user/dfa"
+             (template :nick "dfa" :role "user")))))
+
+  (deftest numeric-parameters-template
+    (let [template (url-template "http://example.com/{id}")]
+      (is (= "http://example.com/42"
+             (template :id 42))))))

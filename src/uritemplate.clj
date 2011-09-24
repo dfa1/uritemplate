@@ -22,6 +22,6 @@
   (let [placeholders (extract-params template)]
     (fn [& more]
       (let [params (apply hash-map more)]
-        (reduce #(.replace %1 (keyword->param %2) (get params %2))
+        (reduce #(.replace %1 (keyword->param %2) (str (get params %2)))
               template
               (keys params))))))
