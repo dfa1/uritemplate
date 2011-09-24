@@ -3,7 +3,9 @@
 (defn param->keyword [param]
   "Transform a string param like `{param}` into `:param`"
   (assert (not-empty param))
-  (keyword (first (re-seq #"\w+" param))))
+  (let [words (re-seq #"\w+" param)]
+    (assert (= 1 (count words)) "spaces not allowed")
+    (keyword (first words))))
 
 (defn keyword->param [keyword]
   "Transform a keyword into param."
@@ -15,6 +17,9 @@
   (assert (not-empty template))
   (map param->keyword (re-seq #"\{\w+\}" template)))
 
+(defn expand-value [value]
+  (java.net.URLEncoder/encode (str value) "utf8"))
+
 (defn url-template [template]
   "Returns a new url-template fn that accepts one keyword argument
    for each uri-parameter."
@@ -22,6 +27,7 @@
   (let [placeholders (extract-params template)]
     (fn [& more]
       (let [params (apply hash-map more)]
-        (reduce #(.replace %1 (keyword->param %2) (str (get params %2)))
-              template
-              (keys params))))))
+        (reduce #(.replace %1 (keyword->param %2) (expand-value (get params %2)))
+                template
+                (keys params))))))
+

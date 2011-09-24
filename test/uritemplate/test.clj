@@ -18,10 +18,8 @@
   (deftest refuse-nil-parameter
     (is (thrown? AssertionError (param->keyword nil))))
 
-  ;; (deftest multi-word-parameters-keeps-only-first
-  ;;   (is (= :foo (param->keyword "{foo bar}"))))
-
-  )
+  (deftest refuse-url-parameters-with-spaces
+    (is (thrown? AssertionError (param->keyword "{foo bar}")))))
 
 
 (testing "keyword to uri parameter"
@@ -55,6 +53,11 @@
 
   (deftest accept-constant-template
     (is (= "http://example.com" ((url-template "http://example.com")))))
+
+  (deftest parameter-expansion-is-url-encoded
+    (let [template (url-template "http://example.com/{name}")]
+      (is (= "http://example.com/davide+angelocola"
+             (template :name "davide angelocola")))))
 
   (deftest one-parameter-template
     (let [template (url-template "http://example.com/users/{nick}")]
