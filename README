@@ -4,10 +4,8 @@ Type 1 uri templates.
 
 ## Usage
 
-(let [template (uri-template "http://example.com/users/{nick}")]
-  (print (template :nick "dfa")) ; http://example.com/users/dfa
-  (print (template :nick "the real dfa"))) ; http://example.com/users/the%20real%20dfa
-
+(let [template (uri-template "http://example.com/{role}/{nick}")]
+  (template :nick "dfa" :role "user")) ; yields http://example.com/user/dfa 
 
 ## Todo
 
