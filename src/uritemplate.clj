@@ -20,9 +20,9 @@
 (defn expand-value [value]
   (java.net.URLEncoder/encode (str value) "utf8"))
 
-(defn url-template [template]
-  "Returns a new url-template fn that accepts one keyword argument
-   for each uri-parameter."
+(defn uri-template [template]
+  "Returns a new uri-template fn that accepts one keyword argument
+   for each uri parameter."
   (assert (not-empty template))
   (let [placeholders (extract-params template)]
     (fn [& more]
