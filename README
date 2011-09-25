@@ -1,13 +1,20 @@
 # uritemplate
 
-FIXME: write description
+Type 1 uri templates.
 
 ## Usage
 
-FIXME: write
+(let [template (uri-template "http://example.com/users/{nick}")]
+  (print (template :nick "dfa")) ; http://example.com/users/dfa
+  (print (template :nick "the real dfa"))) ; http://example.com/users/the%20real%20dfa
+
+
+## Todo
+
+- implement type 2 and type3 uri template specification
 
 ## License
 
-Copyright (C) 2011 FIXME
+Copyright (C) 2011 Davide Angelocola
 
 Distributed under the Eclipse Public License, the same as Clojure.
