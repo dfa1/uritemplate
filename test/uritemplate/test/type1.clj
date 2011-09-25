@@ -1,5 +1,5 @@
-(ns uritemplate.test
-  (:use [uritemplate])
+(ns uritemplate.test.type1
+  (:use [uritemplate.type1])
   (:use [clojure.test]))
 
 ;; uri parameter to keyword conversion

@@ -1,4 +1,4 @@
-(ns uritemplate)
+(ns uritemplate.type1)
 
 (defn param->keyword [param]
   "Transform a string param like `{param}` into `:param`"
@@ -21,7 +21,7 @@
   (java.net.URLEncoder/encode (str value) "utf8"))
 
 (defn uri-template [template]
-  "Returns a new uri-template fn that accepts one keyword argument
+  "Returns a new type1 uri-template fn that accepts one keyword argument
    for each uri parameter."
   (assert (not-empty template))
   (let [placeholders (extract-params template)]
