@@ -46,3 +46,8 @@
   (let [template (uri-template "http://example.com/{id}")]
     (is (= "http://example.com/42"
            (template :id 42)))))
+
+(deftest expande-twice-same-parameter-template
+  (let [template (uri-template "http://example.com/{x}/{x}")]
+    (is (= "http://example.com/5/5"
+           (template :x "5")))))
