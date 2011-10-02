@@ -2,22 +2,6 @@
   (:use [uritemplate.type1])
   (:use [clojure.test]))
 
-;; uri parameter to keyword conversion
-(deftest parameter
-  (is (= :foo (param->keyword "{foo}"))))
-
-(deftest parameter-with-semicolon
-  (is (= :foo (param->keyword "{:foo}"))))
-
-(deftest refuse-empty-parameter
-  (is (thrown? AssertionError (param->keyword ""))))
-
-(deftest refuse-nil-parameter
-  (is (thrown? AssertionError (param->keyword nil))))
-
-(deftest refuse-url-parameters-with-spaces
-  (is (thrown? AssertionError (param->keyword "{foo bar}"))))
-
 ;; keyword to uri parameter
 (deftest accept-keyword
   (is (= "{foo}" (keyword->param :foo))))
@@ -27,13 +11,6 @@
 
 (deftest refuse-nil
   (is (thrown? AssertionError (keyword->param nil))))
-
-;; extract parameters
-(deftest extract-parameter
-  (is (= (list :foo) (extract-params "http://host/{foo}"))))
-
-(deftest multiple-parameters-in-order
-  (is (= (list :foo :bar) (extract-params "http://host/{foo}/{bar}"))))
 
 ;; uri templates
 (deftest refuse-nil-template
