@@ -52,3 +52,11 @@
     (is (= "http://example.com/5/5"
            (template :x "5")))))
 
+(deftest accept-empty-parameter
+  (let [template (uri-template "O{empty}X")]
+    (is (= "OX" (template :empty "")))))
+
+(deftest accept-undef-parameter
+  (let [template (uri-template "O{undef}X")]
+    (is (= "OX" (template)))))
+
