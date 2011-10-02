@@ -14,6 +14,7 @@
   (assert (not-empty template))
   (fn [& more]
     (let [params (apply hash-map more)]
-      (reduce #(.replace %1 (keyword->param %2) (expand-value (get params %2)))
+      (reduce #(.replace %1 (keyword->param %2) (expand-value (%2 params)))
               template
               (keys params)))))
+ 
