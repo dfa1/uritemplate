@@ -57,3 +57,10 @@
 (deftest expand-list*
   (is (= "red,green,blue" (expand-param list))))
 
+;; url-encode
+;; FIXME: move
+(deftest url-encode-plain
+  (is (= "value" (url-encode "value"))))
+
+(deftest can-encode-url
+  (is (= "http%3A%2F%2Fexample.com" (url-encode "http://example.com"))))

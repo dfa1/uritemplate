@@ -25,10 +25,10 @@
 (defmulti expand-expression expression-type :default nil)
 
 (defmethod expand-expression nil [value]
-  :simple)
+  :todo)
 
 (defmethod expand-expression \+ [value]
-  :reserved)
+  :todo)
 
 
 
