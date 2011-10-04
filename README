@@ -1,6 +1,6 @@
 # uritemplate
 
-Type 1 uri templates.
+Generate and parse Uri templates. 
 
 ## Usage
 
@@ -9,7 +9,8 @@ Type 1 uri templates.
 
 ## Todo
 
-- implement type 2 and type3 uri template specification
+- implement level 2/3/4 uri template specification
+- parse template
 
 ## License
 
