@@ -1,8 +1,6 @@
 (ns uritemplate.type4
+  (:use [uritemplate.encoding])
   (:use [clojure.string :only (split join)]))
-
-(defn url-encode [str]
-  (java.net.URLEncoder/encode str "utf8"))
 
 (defmulti expand-param class :default String)
 
@@ -25,7 +23,7 @@
 (defmulti expand-expression expression-type :default nil)
 
 (defmethod expand-expression nil [value]
-  :todo)
+  (-> expand-param url-encode))
 
 (defmethod expand-expression \+ [value]
   :todo)

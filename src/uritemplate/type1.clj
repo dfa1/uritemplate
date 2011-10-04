@@ -1,4 +1,5 @@
-(ns uritemplate.type1)
+(ns uritemplate.type1
+  (:use [uritemplate.encoding]))
 
 (defn param->keyword [param]
   "Transform a string param like `{param}` into `:param`"
@@ -24,9 +25,6 @@
   ([map keys]
      (merge-defaults map "" keys)))
 
-(defn expand-value [value]
-  (java.net.URLEncoder/encode (str value) "utf8"))
-
 (defn uri-template [template]
   "Returns a new type1 uri-template fn that accepts one keyword argument
    for each uri parameter."
@@ -34,8 +32,4 @@
   (let [placeholders (extract-params template)]
     (fn [& more]
       (let [params (merge-defaults (apply hash-map more) placeholders)]
-        (reduce #(.replace %1 (keyword->param %2) (expand-value (get params %2))) template (keys params))))))
-
-
-
-
+        (reduce #(.replace %1 (keyword->param %2) (url-encode (get params %2))) template (keys params))))))

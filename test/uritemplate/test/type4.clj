@@ -39,28 +39,26 @@
 
 ;; section 3.2.2
 ;; simple expansion
-(deftest expand-string
+(deftest expand-simple
   (is (= "value" (expand-param var))))
 
-(deftest expand-string-with-slice
+(deftest expand-simple-with-slice
   (is (= "val" (expand-param (format "%s:3" var)))))
 
-(deftest expand-string-with-slice-greater-than-value
+(deftest expand-simple-with-slice-greater-than-value
   (is (= "value" (expand-param (format "%s:30" var)))))
 
-(deftest expand-half
+(deftest expand-simple-half
   (is (= "50%25" (expand-param half))))
 
-(deftest expand-list
+(deftest expand-simple-list
   (is (= "red,green,blue" (expand-param list))))
 
-(deftest expand-list*
+(deftest expand-simple-list*
   (is (= "red,green,blue" (expand-param list))))
 
-;; url-encode
-;; FIXME: move
-(deftest url-encode-plain
-  (is (= "value" (url-encode "value"))))
+;; section 3.2.3
+;; reserved expansion
 
-(deftest can-encode-url
-  (is (= "http%3A%2F%2Fexample.com" (url-encode "http://example.com"))))
+(deftest expand-reserved
+  (is (= "red,green,blue" (expand-param list))))
