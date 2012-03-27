@@ -11,5 +11,5 @@
 (deftest can-encode-a-number
   (is (= "1" (url-encode 1))))
 
-(deftest can-reserve-encode-url
-  (is (= "http%3A%2F%2Fexample.com" (url-encode "http://example.com"))))
+(deftest can-encode-an-empty-string
+  (is (= "" (url-encode ""))))
