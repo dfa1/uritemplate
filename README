@@ -1,6 +1,6 @@
 # uritemplate
 
-Generate and parse Uri templates. 
+Generate and parse Uri templates based on RFC 6570. 
 
 ## Usage
 
@@ -14,12 +14,17 @@ as uri template parser:
 (let [parse (uri-parser "http://example.com/{role}/{user}")]
   (parse "http://example.com/admin/dfa")) ; yields {:role "admin"
   :user "user" }
-     	    
 
+     	    
 ## Todo
 
 - implement level 2/3/4 uri template specification
 - parse template
+
+## Inspired by
+
+http://code.google.com/p/uri-templates/
+http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework/web/util/UriTemplate.html
 
 ## License
 
