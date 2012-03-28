@@ -15,13 +15,6 @@
 (lexer "www{/context/index.php?param=2") ; FIXME: error unmatched {
 (lexer "{foo}/{bar}") 
 
-(defn parse-variable-list [variables]
-  (re-seq #"[^,]+" variables)) ; FIXME: handle prefix + explode together 
-
-(parse-variable-list "a")
-(parse-variable-list "a,b")
-(parse-variable-list "a,b*")
-(parse-variable-list "a,b:12")
 
 (defn parse-variable-explode [variable]
   [:explode (join (butlast variable))]) 
@@ -30,21 +23,39 @@
 
 (defn parse-variable-prefix [variable]
   (let [[variable prefix] (.split variable ":")]
-    [:prefix variable (Integer/parseInt prefix)]))
+    [:prefix variable prefix]))
 
 (parse-variable-prefix "asd:123")
 
 (defn parse-variable [variable]
   (cond
    (.contains variable "*") (parse-variable-explode variable)
-   (.coùntains variable ":") (parse-variable-prefix variable)
+   (.contains variable ":") (parse-variable-prefix variable)
    :else [:simple variable]))
 
-(
+; FIXME: handle prefix + explode together 
+(defn parse-variable-list [variables]
+  (map parse-variable (re-seq #"[^,]+" variables)))
+
+(parse-variable-list "a")
+(parse-variable-list "a,b")
+(parse-variable-list "a,b*")
+(parse-variable-list "a,b:12")
+
+(defn remove-braces [expression]
+  (.substring expression 1 (dec (.length expression))))
+
+(remove-braces "{2}")
 
 (defn parse-expression [token]
-  
-  [:expression token])
+  (let [expression (remove-braces token)
+        operator (.charAt expression 0)]
+    (cond
+     (= \+ operator) (parse-variable-list (.substring expression 1))
+     (= \# operator) (parse-variable-list (.substring expression 1))
+     :else (parse-variable-list expression))))
+
+(parse-expression "{+foo*,bar}")
 
 (defn parse-literal [token]
   [:literal token])
@@ -60,6 +71,6 @@
 (defn parser [tokens]
   (map parse tokens))
 
-(parser (lexer "http://example.com/{+hello}/{;x,y}"))
+(parser (lexer "http://example.com/{+hello}/{#x,y}"))
 
 
