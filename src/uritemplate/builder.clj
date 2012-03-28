@@ -23,9 +23,8 @@
 (parse-variable-list "a,b*")
 (parse-variable-list "a,b:12")
 
-
 (defn parse-variable-explode [variable]
-  [:explode (.substring variable 0 (dec (count variable)))]) ; TODO: use butlast
+  [:explode (join (butlast variable))]) 
 
 (parse-variable-explode "asd*")
 
