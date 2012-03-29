@@ -1,1 +1,8 @@
-lib
+pom.xml
+lib/
+classes/
+.lein-failures
+.lein-deps-sum
+
+syntax: glob
+*.orig
