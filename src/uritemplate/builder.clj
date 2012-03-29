@@ -5,13 +5,13 @@
 
 (defn parse-variable-prefix [variable]
   (let [[variable prefix] (.split variable ":")]
-     {:type :prefix :name variable :arg prefix}))
+     {:modifier :prefix :name variable :arg prefix}))
 
 (defn parse-variable-simple [variable]
-  {:type :simple :name variable})
+  {:modifier :none :name variable})
 
 (defn parse-variable-explode [variable]
-  {:type :explode :name (.substring variable 0 (dec (.length variable)))}) 
+  {:modifier :explode :name (.substring variable 0 (dec (.length variable)))})
 
 (defn parse-variable [variable]
   "FIXME: handle prefix + explode together"
@@ -23,6 +23,15 @@
 (defn parse-variable-list [variables]
   (map parse-variable (re-seq #"[^,]+" variables)))
 
+(defn with-type [type]
+  "Function factory for setting :type."
+  (fn [map]
+    (assoc map :type type)))
+
+(defn parse-as [type expression]
+  (let [variable-list (parse-variable-list expression)]
+    (map (with-type type) variable-list)))
+   
 (defn parse-literal [token]
   {:type :literal :value token})
 
@@ -30,9 +39,9 @@
   (let [expression (remove-braces token)
         operator (.charAt expression 0)]
     (cond
-     (= \+ operator) (parse-variable-list (.substring expression 1))) 
-     (= \# operator) (parse-variable-list (.substring expression 1))
-     :else (parse-variable-list expression)))
+     (= \+ operator) (parse-as :reserved (.substring expression 1)) 
+     (= \# operator) (parse-as :fragment (.substring expression 1))
+     :else (parse-as :simple expression))))
 
 (defn parse [token]
   (let [valid-expression #"\{\S+\}"]
@@ -49,6 +58,9 @@
 
 (defn builder [template]
   (parser (lexer template)))
+
+(comment
+  (builder "http://www.{domain}/{+context}/{#anchor}"))
 
 ;; (defn simple [map]
 ;;   (assoc map

@@ -22,20 +22,20 @@
 
 
 (deftest variable-exploding
-  (is (= {:type :explode :name "foo"} (parse-variable "foo*"))))
+  (is (= {:modifier :explode :name "foo"} (parse-variable "foo*"))))
 
 (deftest variable-prefixing
-  (is (= {:type :prefix :name "foo" :arg "123"} (parse-variable "foo:123"))))
+  (is (= {:modifier :prefix :name "foo" :arg "123"} (parse-variable "foo:123"))))
 
 (deftest variable-simple
-  (is (= {:type :simple :name "foo"} (parse-variable "foo"))))
+  (is (= {:modifier :none :name "foo"} (parse-variable "foo"))))
 
 (deftest accept-singleton-variable
-  (is (= '({:type :simple :name "foo"})
+  (is (= '({:modifier :none :name "foo"})
          (parse-variable-list "foo"))))
 
 (deftest accept-multiple-variables
-  (is (= '({:type :simple :name "foo"} {:type :simple :name "bar"})
+  (is (= '({:modifier :none :name "foo"} {:modifier :none :name "bar"})
          (parse-variable-list "foo,bar"))))
 
 
@@ -44,5 +44,14 @@
   (is (= {:type :literal :value "http://example.com"} (parse "http://example.com"))))
 
 (deftest accept-simple-expression
-  (is (= '({:type :simple :name "foo"}) (parse "{foo}"))))
+  (is (= '({:type :simple :modifier :none :name "foo"}) (parse "{foo}"))))
+
+(deftest accept-reserved-expression
+  (is (= '({:type :reserved :modifier :none :name "foo"}) (parse "{+foo}"))))
+
+(deftest accept-fragment-expression
+  (is (= '({:type :fragment :modifier :none :name "foo"}) (parse "{#foo}"))))
+
+
+
 

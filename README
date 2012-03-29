@@ -4,22 +4,18 @@ Generate and parse Uri templates based on RFC 6570.
 
 ## Usage
 
-as uri template creator:
-
-(let [create (uri-creator "http://example.com/{role}/{nick}")]
-  (create :nick "dfa" :role "user")) ; yields http://example.com/user/dfa 
-
-as uri template parser:
-
-(let [parse (uri-parser "http://example.com/{role}/{user}")]
-  (parse "http://example.com/admin/dfa")) ; yields {:role "admin"
-  :user "user" }
-
+- uribuilder: TBD
+- uriparser: TBD
      	    
 ## Todo
 
-- implement level 2/3/4 uri template specification
-- parse template
+- PCTs in literals 
+- handle missing } in templates
+- handle prefix together with explode
+- uriparser
+    (let [example-parser (uri-parser "http://example.com/{role}/{user}")]
+      (example-parser "http://example.com/admin/dfa")) ; yields {:role "admin"
+      	  :user "user" }
 
 ## Inspired by
 
@@ -28,6 +24,6 @@ http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework
 
 ## License
 
-Copyright (C) 2011 Davide Angelocola
+Copyright (C) 2011-2012 Davide Angelocola
 
 Distributed under the Eclipse Public License, the same as Clojure.
