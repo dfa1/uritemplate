@@ -44,5 +44,5 @@
   (is (= {:type :literal :value "http://example.com"} (parse "http://example.com"))))
 
 (deftest accept-simple-expression
-  (is (= '({:type :simple :var "foo"}) (parse "{foo}"))))
+  (is (= '({:type :simple :name "foo"}) (parse "{foo}"))))
 

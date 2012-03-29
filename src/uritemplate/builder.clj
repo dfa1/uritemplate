@@ -26,30 +26,13 @@
 (defn parse-literal [token]
   {:type :literal :value token})
 
-(defn simple [map]
-  (assoc map
-    :subtype "simple"
-    :first ""
-    :sep ","
-    :named false
-    :ifemp ""))
-
-(defn reserved [map]
-  (assoc map 
-    :subtype "reserved"
-    :first ""
-    :sep ","
-    :named false
-    :ifemp ""))
-
 (defn parse-expression [token]
   (let [expression (remove-braces token)
         operator (.charAt expression 0)]
     (cond
-     (= \+ operator) (reserved (parse-variable-list (.substring expression 1))) 
+     (= \+ operator) (parse-variable-list (.substring expression 1))) 
      (= \# operator) (parse-variable-list (.substring expression 1))
-     :else (map simple (parse-variable-list expression)))))
-
+     :else (parse-variable-list expression)))
 
 (defn parse [token]
   (let [valid-expression #"\{\S+\}"]
@@ -66,3 +49,19 @@
 
 (defn builder [template]
   (parser (lexer template)))
+
+;; (defn simple [map]
+;;   (assoc map
+;;     :subtype "simple"
+;;     :first ""
+;;     :sep ","
+;;     :named false
+;;     :ifemp ""))
+
+;; (defn reserved [map]
+;;   (assoc map 
+;;     :subtype "reserved"
+;;     :first ""
+;;     :sep ","
+;;     :named false
+;;     :ifemp ""))
