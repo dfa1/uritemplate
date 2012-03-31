@@ -63,20 +63,17 @@
   (zipmap keys (repeat nil)))
 
 (defn merge-parameter-value [part parameters]
-  (let [key (keyword (:name part))
-        value (key parameters)]
-   (assoc part :value value)))
+  (let [name (keyword (:name part))]
+    (if (nil? name)
+      part
+      (assoc part :value (name parameters)))))
 
-(merge-parameter-value {:name "name" :foo 2 :bar 1} {:mario "rossi" :domain "google.com" :name "asd"})
+(defn expand-template [parts]
+  (apply str (map expand parts)))
 
 (defn uritemplate [template]
   (let [parts (parser (lexer template))
-        default-parameters (default-parameters (extract-parameters parts))]
-    (fn [& kvs]
-      (let [parameters (merge default-parameters (apply hash-map kvs))
-            valued-parts (map #(merge-parameter-value % parameters) parts)]
-        (apply str (map expand valued-parts)))
-    )))
-
-  (comment (default-parameters (extract-parameters (parser (lexer  "http://www.{domain}/{+context}/{#anchor}")))))
-
+        wanted-parameters (default-parameters (extract-parameters parts))]
+    (fn [& user-parameters]
+      (let [parameters (merge wanted-parameters (apply hash-map user-parameters))]
+        (expand-template (map #(merge-parameter-value % parameters) parts))))))

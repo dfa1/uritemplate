@@ -59,6 +59,7 @@
   (testing "level1 templates"
     (let [level1 (uritemplate "http://example.com/{name}")]
       (is (= "http://example.com/dfa" (level1 :name "dfa")))))
+  
 
 
   )
