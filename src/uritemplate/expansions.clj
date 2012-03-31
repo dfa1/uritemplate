@@ -3,9 +3,9 @@
 (defn urlencode [v]
   (java.net.URLEncoder/encode (str v) "utf8"))
 
-(defn output [first sep value] ; TODO: smells like multimethod
+(defn render [first sep value] ; TODO: smells like multimethods
   (cond
-   (nil? value) (str "")
+   (nil? value) ""
    (instance? java.lang.String value) (str first (urlencode value))
    (number? value) (str first (urlencode value))
    (map? value) (str "TODO")
@@ -15,22 +15,29 @@
                                         (map urlencode (flatten value)))))
    :else (throw
           (new UnsupportedOperationException
-               (str "unsupported output" (class value))))))
+               (str "unsupported type " (class value))))))
 
-       
+(defn value-of [parameter parameters]
+  (let [name (keyword (:name parameter))]
+    (name parameters)))
+
 (defmulti expand :type)
 
-(defmethod expand :literal [part]
+(defmethod expand :literal [part parameters]
   "Literal expansion."
   (:value part))
 
-(defmethod expand :simple [part]
+(defmethod expand :simple [part parameters]
   "Simple string expansion."
-  (let [expansion (output "" "," (:value part))]
-    (if (and (:sep part) (not (empty? expansion)))
-      (str "," expansion)
-      expansion)))
+  (apply str 
+         (interpose ","
+                    (remove empty?
+                            (map #(render "" "," %)
+                                 (map #(value-of % parameters) (:vars part)))))))
 
+;; (expand {:type :simple, :vars [{:modifier :none, :name "foo"} {:modifier :none, :name "bar"}]} {:foo "foo value" :bar "bar value"})
+
+  
 ;;   +  | Reserved string expansion                     (Sec 3.2.3) |
 ;;    |     |                                                           |
 ;;    |     |    {+var}                value                            |
@@ -38,8 +45,8 @@
 ;;    |     |    {+path}/here          /foo/bar/here                    |
 ;;    |     |    here?ref={+path}      here?ref=/foo/bar                |
 
-(defmethod expand :reserved [part]
-  (output "" "," (:value part)))
+(defmethod expand :reserved [part parameters]
+  "TODO")
 
 
 ;;    |-----+-----------------------------------------------------------|
@@ -64,4 +71,3 @@
 
 ;; {#x,hello,y}          #1024,Hello%20World!,768         |
 ;; {#path,x}/here        #/foo/bar,1024/here
-

@@ -2,6 +2,6 @@
   (:use [uritemplate.expansions])
   (:use [clojure.test]))
 
-(deftest output-smoke-tests
-  (is (= "/1,2,3" (output "/" "," '(1 2 3))))
-  (is (= "/foo" (output "/" "" "foo"))))
+(deftest render-smoke-tests
+  (is (= "/1,2,3" (render "/" "," '(1 2 3))))
+  (is (= "/foo" (render "/" "" "foo"))))

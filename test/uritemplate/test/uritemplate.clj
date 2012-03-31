@@ -37,19 +37,16 @@
          (parse-variable-list "foo,bar"))))
 
 
-
 (deftest accept-literal
   (is (= {:type :literal :value "http://example.com"} (parse "http://example.com"))))
 
 (deftest accept-simple-expression
-  (is (= '({:type :simple :modifier :none :name "foo"}) (parse "{foo}"))))
+  (is (= {:type :simple :vars [{:modifier :none :name "foo"}]}
+         (parse "{foo}"))))
 
-(deftest accept-reserved-expression
-  (is (= '({:type :reserved :modifier :none :name "foo"}) (parse "{+foo}"))))
-
-(deftest accept-fragment-expression
-  (is (= '({:type :fragment :modifier :none :name "foo"}) (parse "{#foo}"))))
-
+(deftest accept-simple-expression-with-two-variables
+  (is (= {:type :simple :vars [{:modifier :none :name "foo"} {:modifier :none :name "bar"}]}
+         (parse "{foo,bar}"))))
 
 
 (deftest readme-example
