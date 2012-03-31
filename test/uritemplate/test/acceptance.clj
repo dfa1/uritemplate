@@ -4,7 +4,7 @@
 
 (defn- expansion [template expansion]
   (let [compiled-template (uritemplate template)]
-    (is (= expansion (compiled-template
+    (is (= expansion (compiled-template ; variabled defined in section 3.2 
                   :dom        "example.com"
                   :dub        "me/too"
                   :foo        "That’s right!"
@@ -24,7 +24,7 @@
                   :undef      nil)))))
 
 
-(deftest simple-string-expansion
+(deftest simple-string-expansion ; section 3.2.2
   (expansion "{var}"       "value")
   (expansion "{hello}"     "Hello%20World%21")
   (expansion "{half}"      "50%25")
@@ -41,4 +41,10 @@
   (expansion "{list*}"     "red,green,blue")
   (expansion "{keys}"      "semi,%3B,dot,.,comma,%2C")
   (expansion "{keys*}"     "semi=%3B,dot=.,comma=%2C"))
-  
+
+(deftest reserved-expansion ; section 3.2.3
+  (expansion "{+var}"       "value")
+  (expansion "{+hello}"     "Hello%20World!")
+  (expansion "{+half}"      "50%25"))
+
+

@@ -1,20 +1,32 @@
 (ns uritemplate.expansions)
 
+(defn urlencode [v]
+  (java.net.URLEncoder/encode (str v) "utf8"))
+
+(defn output [first sep value] ; TODO: smells like multimethod
+  (cond
+   (nil? value) (str "")
+   (instance? java.lang.String value) (str first (urlencode value))
+   (number? value) (str first (urlencode value))
+   (map? value) (str "TODO")
+   (or (vector? value) (list? value)) (str first
+                      (apply str
+                             (interpose sep
+                                        (map urlencode (flatten value)))))
+   :else (throw
+          (new UnsupportedOperationException
+               (str "unsupported output" (class value))))))
+
+       
 (defmulti expand :type)
 
 (defmethod expand :literal [part]
   "Literal expansion."
   (:value part))
 
-;; level1
 (defmethod expand :simple [part]
-  "Simple variable expansion: variable must be url-encoded"
-  (java.net.URLEncoder/encode (str (:value part)) "utf8"))
-
-;; level2
-;;  var   := "value"                                    |
-;;    |             hello := "Hello World!"                             |
-;;    |             path  := "/foo/bar" 
+  "Simple string expansion."
+  (output "" "," (:value part)))
 
 ;;   +  | Reserved string expansion                     (Sec 3.2.3) |
 ;;    |     |                                                           |
@@ -23,14 +35,8 @@
 ;;    |     |    {+path}/here          /foo/bar/here                    |
 ;;    |     |    here?ref={+path}      here?ref=/foo/bar                |
 
-;; (defn reserved [map]
-;;   (assoc map 
-;;     :subtype "reserved"
-;;     :first ""
-;;     :sep ","
-;;     :named false
-;;     :ifemp ""))
-
+(defmethod expand :reserved [part]
+  (output "" "," (:value part)))
 
 
 ;;    |-----+-----------------------------------------------------------|
