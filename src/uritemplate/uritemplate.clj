@@ -1,4 +1,4 @@
-(ns uritemplate.builder
+(ns uritemplate.uritemplate
   (:use [uritemplate.expansions]))
 
 (defn remove-braces [expression]

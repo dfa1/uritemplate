@@ -1,5 +1,5 @@
-(ns uritemplate.test.builder
-  (:use [uritemplate.builder])
+(ns uritemplate.test.uritemplate
+  (:use [uritemplate.uritemplate])
   (:use [clojure.test]))
 
 (deftest lexer-accept-empty-string
