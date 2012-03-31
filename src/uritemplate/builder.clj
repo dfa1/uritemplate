@@ -1,4 +1,5 @@
-(ns uritemplate.builder)
+(ns uritemplate.builder
+  (:use [uritemplate.expansions]))
 
 (defn remove-braces [expression]
   (.substring expression 1 (dec (.length expression))))
@@ -50,30 +51,32 @@
       (parse-literal token))))
 
 (defn parser [tokens]
-  (map parse tokens))
+  (flatten (map parse tokens)))
 
 (defn lexer [template]
-  "FIXME: must return error on unmatched {"
   (re-seq #"\{[^/]+\}|[^{}]+" template))
 
-(defn builder [template]
-  (parser (lexer template)))
+(defn extract-parameters [parts]
+  (remove nil? (map #(-> % :name keyword) parts)))
 
-(comment
-  (builder "http://www.{domain}/{+context}/{#anchor}"))
+(defn default-parameters [keys]
+  (zipmap keys (repeat nil)))
 
-;; (defn simple [map]
-;;   (assoc map
-;;     :subtype "simple"
-;;     :first ""
-;;     :sep ","
-;;     :named false
-;;     :ifemp ""))
+(defn merge-parameter-value [part parameters]
+  (let [key (keyword (:name part))
+        value (key parameters)]
+   (assoc part :value value)))
 
-;; (defn reserved [map]
-;;   (assoc map 
-;;     :subtype "reserved"
-;;     :first ""
-;;     :sep ","
-;;     :named false
-;;     :ifemp ""))
+(merge-parameter-value {:name "name" :foo 2 :bar 1} {:mario "rossi" :domain "google.com" :name "asd"})
+
+(defn uritemplate [template]
+  (let [parts (parser (lexer template))
+        default-parameters (default-parameters (extract-parameters parts))]
+    (fn [& kvs]
+      (let [parameters (merge default-parameters (apply hash-map kvs))
+            valued-parts (map #(merge-parameter-value % parameters) parts)]
+        (apply str (map expand valued-parts)))
+    )))
+
+  (comment (default-parameters (extract-parameters (parser (lexer  "http://www.{domain}/{+context}/{#anchor}")))))
+

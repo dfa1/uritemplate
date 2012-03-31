@@ -1,0 +1,22 @@
+(ns uritemplate.test.expansions
+  (:use [uritemplate.expansions])
+  (:use [clojure.test]))
+
+;; section 3.2
+(def dom        "example.com")
+(def dub        "me/too")
+(def foo        "That’s right!")
+(def hello      "Hello World!")
+(def half       "50%")
+(def var        "value")
+(def who        "fred")
+(def base       "http://example.com/home/")
+(def path       "/foo/bar")
+(def list       [ "red", "green", "blue" ])
+(def keys       {"semi" ";" "dot" "." "comma" ","})
+(def v          "6")
+(def x          "1024")
+(def y          "768")
+(def empty      "")
+(def empty_keys [])
+(def undef      nil)
