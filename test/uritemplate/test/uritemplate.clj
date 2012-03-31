@@ -51,15 +51,7 @@
   (is (= '({:type :fragment :modifier :none :name "foo"}) (parse "{#foo}"))))
 
 
-(deftest accetpance-tests
-  (testing "literal templates"
-    (let [literal (uritemplate "http://example.com")]
-      (is (= "http://example.com" (literal)))))
 
-  (testing "level1 templates"
-    (let [level1 (uritemplate "http://example.com/{name}")]
-      (is (= "http://example.com/dfa" (level1 :name "dfa")))))
-  
-
-
-  )
+(deftest readme-example
+  (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
+      (is (= "http://bitbucket.org/dfa/uritemplate" (bitbucket :user "dfa" :project "uritemplate")))))
