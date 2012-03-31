@@ -24,14 +24,10 @@
 (defn parse-variable-list [variables]
   (map parse-variable (re-seq #"[^,]+" variables)))
 
-(defn with-type [type]
-  "Function factory for setting :type."
-  (fn [map]
-    (assoc map :type type)))
-
 (defn parse-as [type expression]
+  "Parse a variable list yielding a seq of part of the specified type."
   (let [variable-list (parse-variable-list expression)]
-    (map (with-type type) variable-list)))
+    (map #(assoc % :type type) variable-list)))
    
 (defn parse-literal [token]
   {:type :literal :value token})
