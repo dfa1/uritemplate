@@ -26,7 +26,10 @@
 
 (defmethod expand :simple [part]
   "Simple string expansion."
-  (output "" "," (:value part)))
+  (let [expansion (output "" "," (:value part))]
+    (if (and (:sep part) (not (empty? expansion)))
+      (str "," expansion)
+      expansion)))
 
 ;;   +  | Reserved string expansion                     (Sec 3.2.3) |
 ;;    |     |                                                           |

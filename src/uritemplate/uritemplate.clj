@@ -24,11 +24,17 @@
 (defn parse-variable-list [variables]
   (map parse-variable (re-seq #"[^,]+" variables)))
 
+(defn add-sep [maps]
+  "Mark all maps but last with :sep keyword"
+  (let [with-sep    (rest maps)
+        without-sep (first maps)]
+    (concat [without-sep] (map #(assoc % :sep true) with-sep) )))
+
 (defn parse-as [type expression]
   "Parse a variable list yielding a seq of part of the specified type."
   (let [variable-list (parse-variable-list expression)]
-    (map #(assoc % :type type) variable-list)))
-   
+    (add-sep (map #(assoc % :type type) variable-list))))
+
 (defn parse-literal [token]
   {:type :literal :value token})
 
@@ -73,3 +79,5 @@
     (fn [& user-parameters]
       (let [parameters (merge wanted-parameters (apply hash-map user-parameters))]
         (expand-template (map #(merge-parameter-value % parameters) parts))))))
+
+(parser (lexer "?{map}"))

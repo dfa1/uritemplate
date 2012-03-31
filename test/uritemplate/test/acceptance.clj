@@ -4,7 +4,7 @@
 
 (defn- expansion [template expansion]
   (let [compiled-template (uritemplate template)]
-    (is (= expansion (compiled-template ; variabled defined in section 3.2 
+    (is (= expansion (compiled-template ; variables defined in section 3.2 
                   :dom        "example.com"
                   :dub        "me/too"
                   :foo        "That’s right!"
@@ -22,7 +22,6 @@
                   :empty      ""
                   :empty_keys []
                   :undef      nil)))))
-
 
 (deftest simple-string-expansion ; section 3.2.2
   (expansion "{var}"       "value")
