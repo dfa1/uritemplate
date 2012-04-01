@@ -65,6 +65,18 @@
   (let [name (keyword (:name variable))]
     (name variables)))
  
+;; Appendix A
+;;
+;; .------------------------------------------------------------------.
+;; |          NUL     +      .       /       ;      ?      &      #   |
+;; |------------------------------------------------------------------|
+;; | first |  ""     ""     "."     "/"     ";"    "?"    "&"    "#"  |
+;; | sep   |  ","    ","    "."     "/"     ";"    "&"    "&"    ","  |
+;; | named | false  false  false   false   true   true   true   false |
+;; | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
+;; | allow |   U     U+R     U       U       U      U      U     U+R  |
+;; `------------------------------------------------------------------'
+
 (defn- configurable-expander [part variables urlencoder]
   (join ","
         (remove empty?
