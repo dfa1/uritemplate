@@ -23,7 +23,8 @@
   (contains? reserved ch))
 
 (defn pct-encode [ch]
-   (.toUpperCase (str "%" (Integer/toHexString (int ch)))))
+  "Unconditionally percent encode input character."
+  (str "%" (.toUpperCase (Integer/toHexString (int ch)))))
 
 (defn skip-pct-encode-if [pred ch]
   (if (pred ch)

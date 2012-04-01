@@ -2,6 +2,10 @@
   (:use [uritemplate.expansions])
   (:use [clojure.test]))
 
+(deftest pct-encode-test
+  (is (= "%20" (pct-encode \space)))
+  (is (= "%2F" (pct-encode \/))))
+
 (deftest urlencode-test
   (is (= "hello" (urlencode "hello")))
   (is (= "hello%20world%21" (urlencode "hello world!"))))
