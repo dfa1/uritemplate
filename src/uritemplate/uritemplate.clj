@@ -57,7 +57,7 @@
   (flatten (map parse tokens)))
 
 (defn lexer [template]
-  (re-seq #"\{[^/]+\}|[^{}]+" template))
+  (re-seq #"\{[^/\{]+\}|[^{}]+" template))
 
 (defn expand-all [parts variables]
   (apply str (map #(expand % variables) parts)))

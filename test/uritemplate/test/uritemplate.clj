@@ -14,6 +14,9 @@
 (deftest lexer-accept-expressions-interleaved-by-literals
     (is (= '("www" "{.dom*}" "/" "{context}") (lexer "www{.dom*}/{context}"))))
 
+(deftest lexer-accept-consecutive-expressions
+  (is (= '("up" "{+path}" "{var}" "/here") (lexer "up{+path}{var}/here"))))
+
 
 (deftest get-variable-list-test
   (is (= ""         (get-variable-list "{}")))
@@ -65,7 +68,6 @@
 (deftest accept-expression-without-variables
   (is (= {:type :literal :value "{}"}
          (parse "{}"))))
-
 
 (deftest readme-example
   (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
