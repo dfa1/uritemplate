@@ -13,9 +13,11 @@ Generate uritemplates according to RFC 6570 (not fully compatible yet).
      	    
 ## Todo
 
+
 - PCTs in literals 
 - handle missing } in templates
 - handle prefix together with explode
+- refactoring: check StringSeq vs java.lang.String usage
 - uriparser
     (let [example-parser (uri-parser "http://example.com/{role}/{user}")]
       (example-parser "http://example.com/admin/dfa")) ; yields {:role "admin"

@@ -1,13 +1,29 @@
 (ns uritemplate.expansions)
 
+
+(defn char-range [from to]
+    (map char (range (int from) (inc (int to)))))
+
+(def unreserved (set (concat (char-range \A \Z)
+                             (char-range \a \z)
+                             (char-range \0 \9)
+                             '(\- \_ \. \~))))
+(def reserved (seq '(\! \* \' \( \) \;	\: \@ \& \= \+ \$ \, \/	\? \# \[ \])))
+
+(defn pct-encode [ch] 
+  (if (get unreserved ch)
+    (str ch)
+    (str "%" (Integer/toHexString (int ch)))))
+
+(defn urlencode [v]
+  (apply str (map pct-encode (str v))))
+
 (defmulti expand :type)
 
 (defmethod expand :literal [part variables]
   "Literal expansion."
   (:value part))
 
-(defn urlencode [v]
-  (java.net.URLEncoder/encode (str v) "utf8"))
 
 (defn join [sep coll]
   (apply str (interpose sep coll)))
@@ -39,37 +55,10 @@
                      (map #(assoc % :value (render "" "," (:value %)))
                           (map #(assoc % :value (value-of % variables)) (:vars part)))))))
 
-  
-;;   +  | Reserved string expansion                     (Sec 3.2.3) |
-;;    |     |                                                           |
-;;    |     |    {+var}                value                            |
-;;    |     |    {+hello}              Hello%20World!                   |
-;;    |     |    {+path}/here          /foo/bar/here                    |
-;;    |     |    here?ref={+path}      here?ref=/foo/bar                |
-
-(defmethod expand :reserved [part parameters]
-  "TODO")
-
-
-;;    |-----+-----------------------------------------------------------|
-;;    |  #  | Fragment expansion, crosshatch-prefixed       (Sec 3.2.4) |
-;;    |     |                                                           |
-;;    |     |    X{#var}               X#value                          |
-;; |     |    X{#hello}             X#Hello%20World!
-
-;; reserved-string-expand
-;; fragment-expand
-
-;; multiple-expand
-
-;; map?{x,y}             map?1024,768                     |
-;; {x,hello,y}           1024,Hello%20World%21,768
-
-
-;; multiple-reseverd-expand
-;;    {+x,hello,y}          1024,Hello%20World!,768          |
-;;    |     |    {+path,x}/here        /foo/bar,1024/here          
-
-
-;; {#x,hello,y}          #1024,Hello%20World!,768         |
-;; {#path,x}/here        #/foo/bar,1024/here
+(defmethod expand :reserved [part variables]
+  "Reserved expansion."
+  (join ","
+        (remove empty?
+                (map #(truncate-to (:value %) (get % :maxlen 9999))
+                     (map #(assoc % :value (render "" "," (:value %)))
+                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
