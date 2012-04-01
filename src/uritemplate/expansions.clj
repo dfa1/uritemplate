@@ -1,7 +1,16 @@
 (ns uritemplate.expansions)
 
+(defmulti expand :type)
+
+(defmethod expand :literal [part variables]
+  "Literal expansion."
+  (:value part))
+
 (defn urlencode [v]
   (java.net.URLEncoder/encode (str v) "utf8"))
+
+(defn join [sep coll]
+  (apply str (interpose sep coll)))
 
 (defn render [first sep value] ; TODO: smells like multimethods
   (cond
@@ -9,33 +18,26 @@
    (instance? java.lang.String value) (str first (urlencode value))
    (number? value) (str first (urlencode value))
    (map? value) (str "TODO")
-   (or (vector? value) (list? value)) (str first
-                      (apply str
-                             (interpose sep
-                                        (map urlencode (flatten value)))))
+   (sequential? value) (str first (join sep (map urlencode (flatten value))))
    :else (throw
           (new UnsupportedOperationException
                (str "unsupported type " (class value))))))
 
-(defn value-of [parameter parameters]
-  (let [name (keyword (:name parameter))]
-    (name parameters)))
+(defn truncate-to [str requested-len]
+  (let [len (min requested-len (count str))]
+    (.substring str 0 len)))
 
-(defmulti expand :type)
+(defn value-of [variable variables]
+  (let [name (keyword (:name variable))]
+    (name variables)))
 
-(defmethod expand :literal [part parameters]
-  "Literal expansion."
-  (:value part))
-
-(defmethod expand :simple [part parameters]
+(defmethod expand :simple [part variables]
   "Simple string expansion."
-  (apply str 
-         (interpose ","
-                    (remove empty?
-                            (map #(render "" "," %)
-                                 (map #(value-of % parameters) (:vars part)))))))
-
-;; (expand {:type :simple, :vars [{:modifier :none, :name "foo"} {:modifier :none, :name "bar"}]} {:foo "foo value" :bar "bar value"})
+  (join ","
+        (remove empty?
+                (map #(truncate-to (:value %) (get % :maxlen 9999))
+                     (map #(assoc % :value (render "" "," (:value %)))
+                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
 
   
 ;;   +  | Reserved string expansion                     (Sec 3.2.3) |

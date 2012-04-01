@@ -5,17 +5,20 @@
   (.substring expression 1 (dec (.length expression))))
 
 (defn parse-variable-prefix [variable]
-  (let [[variable prefix] (.split variable ":")]
-     {:modifier :prefix :name variable :arg prefix}))
+  (let [[variable prefix] (.split variable ":")
+        maxlen (Integer/parseInt prefix)]
+    (assert (< maxlen 10000)) ; sec 2.4.1
+    (assert (> maxlen 0))     ; sec 2.4.1
+    {:name variable :maxlen maxlen}))
 
 (defn parse-variable-simple [variable]
-  {:modifier :none :name variable})
+  {:name variable})
 
 (defn parse-variable-explode [variable]
-  {:modifier :explode :name (.substring variable 0 (dec (.length variable)))})
+  {:name (.substring variable 0 (dec (.length variable))) :explode true})
 
 ;; FIXME: handle prefix + explode together
-;; FIXME: ABNF rules for varname:
+;; FIXME: ABNF rules for varname sec 2.3:
 ;;     variable-list =  varspec *( "," varspec )
 ;;     varspec       =  varname [ modifier-level4 ]
 ;;     varname       =  varchar *( ["."] varchar )
@@ -57,11 +60,12 @@
 (defn lexer [template]
   (re-seq #"\{[^/]+\}|[^{}]+" template))
 
-(defn expand-all [parts parameters]
-  (apply str (map #(expand % parameters) parts)))
+(defn expand-all [parts variables]
+  (apply str (map #(expand % variables) parts)))
 
 (defn uritemplate [template]
   (let [parts (parser (lexer template))]
-    (fn [& parameters]
-      (expand-all parts (apply hash-map parameters)))))
+    (fn [& variables]
+      (expand-all parts (apply hash-map variables)))))
+
 
