@@ -64,6 +64,13 @@
 (defn value-of [variable variables]
   (let [name (keyword (:name variable))]
     (name variables)))
+ 
+(defn- configurable-expander [part variables urlencoder]
+  (join ","
+        (remove empty?
+                (map #(truncate-to (:value %) (get % :maxlen 9999))
+                     (map #(assoc % :value (render "," (:value %) urlencoder))
+                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
 
 (defmulti expand :type)
 
@@ -73,24 +80,15 @@
 
 (defmethod expand :simple [part variables]
   "Simple string expansion."
-  (join ","
-        (remove empty?
-                (map #(truncate-to (:value %) (get % :maxlen 9999))
-                     (map #(assoc % :value (render "," (:value %) urlencode))
-                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
+  (configurable-expander part variables urlencode))
 
 (defmethod expand :reserved [part variables]
   "Reserved expansion."
-  (join ","
-        (remove empty?
-                (map #(truncate-to (:value %) (get % :maxlen 9999))
-                     (map #(assoc % :value (render "," (:value %) urlencode-reserved))
-                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
+  (configurable-expander part variables urlencode-reserved))
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
-  (join ","
-        (remove empty?
-                (map #(truncate-to (:value %) (get % :maxlen 9999))
-                     (map #(assoc % :value (render "," (:value %) urlencode-reserved))
-                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
+  (let [expansion (configurable-expander part variables urlencode-reserved)]
+    (if (empty? expansion)
+      expansion
+      (str "#" expansion))))
