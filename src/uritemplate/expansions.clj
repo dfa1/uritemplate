@@ -1,13 +1,20 @@
 (ns uritemplate.expansions)
 
 (defn char-range [from to]
+  "A declarative way to declare range of characters."
   (map char (range (int from) (inc (int to)))))
 
-(def unreserved (set (concat (char-range \A \Z)
-                             (char-range \a \z)
-                             (char-range \0 \9)
-                             '(\- \_ \. \~))))
-(def reserved (set '(\! \* \' \( \) \;	\: \@ \& \= \+ \$ \, \/	\? \# \[ \])))
+(def unreserved
+  "Never pct-encode these characters."
+  (set (concat
+        (char-range \A \Z)
+        (char-range \a \z)
+        (char-range \0 \9)
+        '(\- \_ \. \~))))
+
+(def reserved
+  "Don't pct-encode these character on + and # expansion."
+  (set '(\! \* \' \( \) \; \: \@ \& \= \+ \$ \, \/ \? \# \[ \])))
 
 (defn unreserved? [ch]
   (contains? unreserved ch))
@@ -23,7 +30,7 @@
     (str ch)
     (pct-encode ch)))
 
-(defn configurable-urlencode [value pred]
+(defn configurable-urlencode [value pred]'
   (apply str (map #(skip-pct-encode-if pred %) value)))
   
 (defn urlencode [value]
