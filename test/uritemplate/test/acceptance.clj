@@ -42,8 +42,21 @@
   (expansion "{keys*}"     "semi=%3B,dot=.,comma=%2C"))
 
 (deftest reserved-expansion ; section 3.2.3
-  (expansion "{+var}"       "value")
-  (expansion "{+hello}"     "Hello%20World!")
-  (expansion "{+half}"      "50%25"))
-
+  (expansion "{+var}"              "value")
+  (expansion "{+hello}"            "Hello%20World!")
+  (expansion "{+half}"             "50%25")
+  (expansion "{base}index"         "http%3A%2F%2Fexample.com%2Fhome%2Findex")
+  (expansion "{+base}index"        "http://example.com/home/index")
+  (expansion "O{+empty}X"          "OX")
+  (expansion "O{+undef}X"          "OX")
+  (expansion "{+path}/here"        "/foo/bar/here")
+  (expansion "here?ref={+path}"    "here?ref=/foo/bar")
+  (expansion "up{+path}{var}/here" "up/foo/barvalue/here")
+  (expansion "{+x,hello,y}"        "1024,Hello%20World!,768")
+  (expansion "{+path,x}/here"      "/foo/bar,1024/here")
+  (expansion "{+path:6}/here"      "/foo/b/here")
+  (expansion "{+list}"             "red,green,blue")
+  (expansion "{+list*}"            "red,green,blue")
+  (expansion "{+keys}"             "semi,;,dot,.,comma,,")
+  (expansion "{+keys*}"            "semi=;,dot=.,comma=,"))
 

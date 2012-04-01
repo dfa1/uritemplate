@@ -6,9 +6,13 @@
   (is (= "hello" (urlencode "hello")))
   (is (= "hello%20world%21" (urlencode "hello world!"))))
 
+(deftest urlencode-reserved-test
+  (is (= "hello" (urlencode-reserved "hello")))
+  (is (= "hello%20world!" (urlencode-reserved "hello world!"))))
+
 (deftest render-test
-  (is (= "/1,2,3" (render "/" "," '(1 2 3))))
-  (is (= "/foo" (render "/" "" "foo"))))
+  (is (= "1,2,3" (render "," '(1 2 3) identity)))
+  (is (= "foo" (render "" "foo" identity))))
 
 (deftest truncate-to-test
   (is (= "val" (truncate-to "value" 3)))
