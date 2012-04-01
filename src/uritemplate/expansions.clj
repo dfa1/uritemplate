@@ -31,9 +31,9 @@
     (str ch)
     (pct-encode ch)))
 
-(defn configurable-urlencode [value pred]'
+(defn configurable-urlencode [value pred]
   (apply str (map #(skip-pct-encode-if pred %) value)))
-  
+
 (defn urlencode [value]
   "urlencode only non-reserved characters."
   (configurable-urlencode value unreserved?))
