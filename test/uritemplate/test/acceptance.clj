@@ -21,7 +21,7 @@
                   :y          "768"
                   :empty      ""
                   :empty_keys []
-                  :undef      nil)))))
+                  :undef      nil)) (str "failed expansion of '" template "'"))))
 
 (deftest simple-string-expansion ; section 3.2.2
   (expansion "{var}"       "value")
@@ -60,3 +60,16 @@
   (expansion "{+keys}"             "semi,;,dot,.,comma,,")
   (expansion "{+keys*}"            "semi=;,dot=.,comma=,"))
 
+(deftest fragment-expansion ; section 3.2.4
+  (expansion "{#var}"             "#value")
+  (expansion "{#hello}"           "#Hello%20World!")
+  (expansion "{#half}"            "#50%25")
+  (expansion "foo{#empty}"        "foo#")
+  (expansion "foo{#undef}"        "foo")
+  (expansion "{#x,hello,y}"       "#1024,Hello%20World!,768")
+  (expansion "{#path,x}/here"     "#/foo/bar,1024/here")
+  (expansion "{#path:6}/here"     "#/foo/b/here")
+  (expansion "{#list}"            "#red,green,blue")
+  (expansion "{#list*}"           "#red,green,blue")
+  (expansion "{#keys}"            "#semi,;,dot,.,comma,,")
+  (expansion "{#keys*}"           "#semi=;,dot=.,comma=,"))

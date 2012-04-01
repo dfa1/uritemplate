@@ -77,3 +77,16 @@
                 (map #(truncate-to (:value %) (get % :maxlen 9999))
                      (map #(assoc % :value (render "," (:value %) urlencode-reserved))
                           (map #(assoc % :value (value-of % variables)) (:vars part)))))))
+
+(defmethod expand :fragment [part variables]
+  "Fragment expansion."
+  (let [expansion
+        (join ","
+              (remove empty?
+                      (map #(truncate-to (:value %) (get % :maxlen 9999))
+                           (map #(assoc % :value (render "," (:value %) urlencode-reserved))
+                                (map #(assoc % :value (value-of % variables)) (:vars part))))))]
+    (if (empty? expansion)
+      expansion
+      (str "#" expansion)
+    )))

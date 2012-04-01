@@ -67,5 +67,3 @@
   (let [parts (parser (lexer template))]
     (fn [& variables]
       (expand-all parts (apply hash-map variables)))))
-
-
