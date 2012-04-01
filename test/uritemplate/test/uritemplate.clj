@@ -58,8 +58,12 @@
   (is (= {:type :simple :vars [{:name "foo"} {:name "bar"}]}
          (parse "{foo,bar}"))))
 
+(deftest accept-reserved-expression-with-two-variables
+  (is (= {:type :reserved :vars [{:name "foo"} {:name "bar"}]}
+         (parse "{+foo,bar}"))))
+
 (deftest accept-expression-without-variables
-  (is (= {:type :simple :vars []}
+  (is (= {:type :literal :value "{}"}
          (parse "{}"))))
 
 
