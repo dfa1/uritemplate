@@ -37,12 +37,21 @@
 (defn join [sep coll]
   (apply str (interpose sep coll)))
 
-(defn render [sep value urlencoder] ; TODO: smells like multimethods
+(defn unexplode [coll]
+  (flatten (seq coll)))
+
+(defn kv [[key value] urlencoder]
+  (vector key "=" (urlencoder value)))
+
+(defn explode [coll urlencoder]
+  (flatten (interpose "," (map #(kv % urlencoder) (seq coll)))))
+
+(defn render [sep value urlencoder] 
   (cond
-   (nil? value) ""
-   (instance? java.lang.String value) (urlencoder value)
-   (number? value) (urlencoder value)
-   (map? value) (urlencoder "TODO")
+   (nil? value)        ""
+   (instance?          java.lang.String value) (urlencoder value)
+   (number? value)     (urlencoder value)
+   (map? value)        (join sep (map urlencoder (unexplode value)))
    (sequential? value) (join sep (map urlencoder value))
    :else (throw
           (new UnsupportedOperationException
@@ -80,12 +89,8 @@
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
-  (let [expansion (join ","
-                      (remove empty?
-                      (map #(truncate-to (:value %) (get % :maxlen 9999))
-                           (map #(assoc % :value (render "," (:value %) urlencode-reserved))
-                                (map #(assoc % :value (value-of % variables)) (:vars part))))))]
-    (if (empty? expansion)
-      expansion
-      (str "#" expansion)
-    )))
+  (join ","
+        (remove empty?
+                (map #(truncate-to (:value %) (get % :maxlen 9999))
+                     (map #(assoc % :value (render "," (:value %) urlencode-reserved))
+                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))

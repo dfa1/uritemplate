@@ -15,7 +15,7 @@
    :base       "http://example.com/home/"
    :path       "/foo/bar"
    :list       [ "red" "green" "blue" ]
-   :keys       {"semi" ";" "dot" "." "comma" ","}
+   :keys       {"semi" ";" "dot" "." "comma" ","}  
    :v          "6"
    :x          "1024"
    :y          "768"
@@ -44,8 +44,8 @@
   (expansion "{var:30}"    "value")
   (expansion "{list}"      "red,green,blue")
   (expansion "{list*}"     "red,green,blue")
-  (expansion "{keys}"      "semi,%3B,dot,.,comma,%2C")
-  (expansion "{keys*}"     "semi=%3B,dot=.,comma=%2C"))
+  (expansion "{keys}"      "dot,.,semi,%3B,comma,%2C")
+  (expansion "{keys*}"     "dot=.,semi=%3B,comma=%2C"))
 
 (deftest reserved-expansion ; section 3.2.3
   (expansion "{+var}"              "value")
@@ -63,8 +63,8 @@
   (expansion "{+path:6}/here"      "/foo/b/here")
   (expansion "{+list}"             "red,green,blue")
   (expansion "{+list*}"            "red,green,blue")
-  (expansion "{+keys}"             "semi,;,dot,.,comma,,")
-  (expansion "{+keys*}"            "semi=;,dot=.,comma=,"))
+  (expansion "{+keys}"             "dot=.,semi,;comma,,")
+  (expansion "{+keys*}"            "dot=.,semi=;comma=,"))
 
 (deftest fragment-expansion ; section 3.2.4
   (expansion "{#var}"             "#value")

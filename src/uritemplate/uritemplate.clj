@@ -29,10 +29,9 @@
 (defn parse-variable-list [variables]
   (map parse-variable (re-seq #"[^,]+" variables)))
 
-(defn parse-as [type expression]
-  "Parse a variable list yielding a seq of part of the specified type."
-  (let [variable-list (parse-variable-list expression)]
-    {:type type :vars (vec variable-list)}))
+(defn parse-as [type variable-list]
+  (let [variables (parse-variable-list variable-list)]
+    {:type type :vars (vec variables)}))
 
 (defn parse-literal [token]
   {:type :literal :value token})
@@ -42,14 +41,14 @@
 
 (defn parse-expression [expression]
   (let [variable-list (get-variable-list expression)
-        operator (.charAt expression 0)]
+        operator (.charAt variable-list 0)]
     (cond
      (= \+ operator) (parse-as :reserved (.substring variable-list 1)) 
      (= \# operator) (parse-as :fragment (.substring variable-list 1))
-     :else (parse-as :simple variable-list))))
+     :else           (parse-as :simple variable-list))))
 
 (defn parse [token]
-  (let [valid-expression #"\{\S*\}"]
+  (let [valid-expression #"\{\S+\}"]
     (if (re-matches valid-expression token)
       (parse-expression token)
       (parse-literal token))))
