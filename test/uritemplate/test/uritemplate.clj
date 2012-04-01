@@ -15,8 +15,11 @@
     (is (= '("www" "{.dom*}" "/" "{context}") (lexer "www{.dom*}/{context}"))))
 
 
-(deftest removing-braces
-  (is (= "foo" (remove-braces "{foo}"))))
+(deftest get-variable-list-test
+  (is (= "foo"      (get-variable-list "{foo}")))
+  (is (= "foo*"     (get-variable-list "{foo*}")))
+  (is (= "foo:10"   (get-variable-list "{foo:10}")))
+  (is (= "foo,bar" (get-variable-list "{foo,bar}"))))
 
 
 (deftest variable-exploding

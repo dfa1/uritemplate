@@ -1,9 +1,6 @@
 (ns uritemplate.uritemplate
   (:use [uritemplate.expansions]))
 
-(defn remove-braces [expression]
-  (.substring expression 1 (dec (.length expression))))
-
 (defn parse-variable-prefix [variable]
   (let [[variable prefix] (.split variable ":")
         maxlen (Integer/parseInt prefix)]
@@ -40,13 +37,16 @@
 (defn parse-literal [token]
   {:type :literal :value token})
 
-(defn parse-expression [token]
-  (let [expression (remove-braces token)
+(defn get-variable-list [expression]
+  (.substring expression 1 (dec (.length expression))))
+
+(defn parse-expression [expression]
+  (let [variable-list (get-variable-list expression)
         operator (.charAt expression 0)]
     (cond
-     (= \+ operator) (parse-as :reserved (.substring expression 1)) 
-     (= \# operator) (parse-as :fragment (.substring expression 1))
-     :else (parse-as :simple expression))))
+     (= \+ operator) (parse-as :reserved (.substring variable-list 1)) 
+     (= \# operator) (parse-as :fragment (.substring variable-list 1))
+     :else (parse-as :simple variable-list))))
 
 (defn parse [token]
   (let [valid-expression #"\{\S+\}"]
