@@ -58,4 +58,4 @@
 (deftest readme-example
   (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
     (is (= "http://bitbucket.org/dfa/uritemplate"
-           (bitbucket :user "dfa" :project "uritemplate")))))
+           (bitbucket {:user "dfa" :project "uritemplate"})))))

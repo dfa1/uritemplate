@@ -65,5 +65,4 @@
 
 (defn uritemplate [template]
   (let [parts (parser (lexer template))]
-    (fn [& variables]
-      (expand-all parts (apply hash-map variables)))))
+    (fn [variables] (expand-all parts variables))))

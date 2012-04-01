@@ -2,26 +2,32 @@
   (:use [uritemplate.uritemplate])
   (:use [clojure.test]))
 
+;; variables defined in section 3.2
+(def example-variables
+  {
+   :dom        "example.com"
+   :dub        "me/too"
+   :foo        "That’s right!"
+   :hello      "Hello World!"
+   :half       "50%"
+   :var        "value"
+   :who        "fred"
+   :base       "http://example.com/home/"
+   :path       "/foo/bar"
+   :list       [ "red" "green" "blue" ]
+   :keys       {"semi" ";" "dot" "." "comma" ","}
+   :v          "6"
+   :x          "1024"
+   :y          "768"
+   :empty      ""
+   :empty_keys []
+   :undef      nil
+   })
+
 (defn- expansion [template expansion]
   (let [compiled-template (uritemplate template)]
-    (is (= expansion (compiled-template ; variables defined in section 3.2 
-                  :dom        "example.com"
-                  :dub        "me/too"
-                  :foo        "That’s right!"
-                  :hello      "Hello World!"
-                  :half       "50%"
-                  :var        "value"
-                  :who        "fred"
-                  :base       "http://example.com/home/"
-                  :path       "/foo/bar"
-                  :list       [ "red" "green" "blue" ]
-                  :keys       {"semi" ";" "dot" "." "comma" ","}
-                  :v          "6"
-                  :x          "1024"
-                  :y          "768"
-                  :empty      ""
-                  :empty_keys []
-                  :undef      nil)) (str "failed expansion of '" template "'"))))
+    (is (= expansion (compiled-template example-variables))
+        (str "failed expansion of '" template "'"))))
 
 (deftest simple-string-expansion ; section 3.2.2
   (expansion "{var}"       "value")
