@@ -49,7 +49,7 @@
      :else (parse-as :simple variable-list))))
 
 (defn parse [token]
-  (let [valid-expression #"\{\S+\}"]
+  (let [valid-expression #"\{\S*\}"]
     (if (re-matches valid-expression token)
       (parse-expression token)
       (parse-literal token))))

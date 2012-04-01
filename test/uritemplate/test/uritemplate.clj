@@ -16,16 +16,17 @@
 
 
 (deftest get-variable-list-test
+  (is (= ""         (get-variable-list "{}")))
   (is (= "foo"      (get-variable-list "{foo}")))
   (is (= "foo*"     (get-variable-list "{foo*}")))
   (is (= "foo:10"   (get-variable-list "{foo:10}")))
-  (is (= "foo,bar" (get-variable-list "{foo,bar}"))))
+  (is (= "foo,bar"  (get-variable-list "{foo,bar}"))))
 
 
 (deftest variable-exploding
   (is (= {:explode true :name "foo"} (parse-variable "foo*"))))
 
-(deftest variable-prefix-maxlen-is-stored
+(deftest variable-prefix-maxlen-is-saved
   (is (= {:name "foo" :maxlen 123} (parse-variable "foo:123"))))
 
 (deftest variable-maxlen-must-be-less-than-10000
@@ -56,6 +57,10 @@
 (deftest accept-simple-expression-with-two-variables
   (is (= {:type :simple :vars [{:name "foo"} {:name "bar"}]}
          (parse "{foo,bar}"))))
+
+(deftest accept-expression-without-variables
+  (is (= {:type :simple :vars []}
+         (parse "{}"))))
 
 
 (deftest readme-example
