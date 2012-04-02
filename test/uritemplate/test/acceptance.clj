@@ -64,7 +64,7 @@
   (expansion "{+list}"             "red,green,blue")
   (expansion "{+list*}"            "red,green,blue")
   (expansion "{+keys}"             "dot,.,semi,;,comma,,")
-  (expansion "{+keys*}"            "dot=.,semi=;comma=,"))
+  (expansion "{+keys*}"            "dot=.,semi=;,comma=,"))
 
 (deftest fragment-expansion ; section 3.2.4
   (expansion "{#var}"             "#value")
@@ -77,5 +77,5 @@
   (expansion "{#path:6}/here"     "#/foo/b/here")
   (expansion "{#list}"            "#red,green,blue")
   (expansion "{#list*}"           "#red,green,blue")
-  (expansion "{#keys}"            "#semi,;,dot,.,comma,,")
-  (expansion "{#keys*}"           "#semi=;,dot=.,comma=,"))
+  (expansion "{#keys}"            "#dot,.,semi,;,comma,,")
+  (expansion "{#keys*}"           "#dot=.,semi=;,comma=,"))

@@ -15,8 +15,8 @@
   (is (= "hello%20world!" (urlencode-reserved "hello world!"))))
 
 (deftest render-test
-  (is (= "1,2,3" (render "," '(1 2 3) identity)))
-  (is (= "foo" (render "" "foo" identity))))
+  (is (= "1,2,3" (render "," '(1 2 3) identity false)))
+  (is (= "foo" (render "" "foo" identity false))))
 
 (deftest truncate-to-test
   (is (= "val" (truncate-to "value" 3)))
@@ -26,3 +26,7 @@
 (deftest simple-expansion-test
   (is (= "val" (expand {:type :simple :vars [{:name "var" :maxlen 3}]}
                        {:var "value"}))))
+
+(deftest explode-test
+  (let [keys {"semi" ";" "dot" "." "comma" ","}]
+    (is (= "dot=.,semi=%3B,comma=%2C" (explode keys "," urlencode)))))

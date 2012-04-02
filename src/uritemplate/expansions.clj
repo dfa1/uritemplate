@@ -32,38 +32,39 @@
     (pct-encode ch)))
 
 (defn configurable-urlencode [value pred]
-  (apply str (map #(skip-pct-encode-if pred %) value)))
+  (apply str (map #(skip-pct-encode-if pred %) (str value))))
 
 (defn urlencode [value]
-  "urlencode only non-reserved characters."
+  "url-encode only non-reserved characters."
   (configurable-urlencode value unreserved?))
 
 (defn urlencode-reserved [value]
-  "urlencode reserved as well as non-reserved characters."
+  "url-encode reserved as well as non-reserved characters."
   (configurable-urlencode value (fn [ch] (or (reserved? ch) (unreserved? ch)))))
 
 (defn join [sep coll]
   (apply str (interpose sep coll)))
 
-(defn unexplode [coll]
-  (flatten (seq coll)))
+(defn unexplode [coll sep urlencoder]
+  (join sep (map urlencoder (flatten (seq coll)))))
 
 (defn kv [[key value] urlencoder]
-  (vector key "=" (urlencoder value)))
+  (str key "=" (urlencoder value)))
 
-(defn explode [coll urlencoder]
-  (flatten (interpose "," (map #(kv % urlencoder) (seq coll)))))
+(defn explode [coll sep urlencoder]
+  (join sep (map #(kv % urlencoder) (seq coll))))
 
-(defn render [sep value urlencoder] 
-  (cond
-   (nil? value)        ""
-   (instance?          java.lang.String value) (urlencoder value)
-   (number? value)     (urlencoder value)
-   (map? value)        (join sep (map urlencoder (unexplode value)))
-   (sequential? value) (join sep (map urlencoder value))
-   :else (throw
-          (new UnsupportedOperationException
-               (str "unsupported type " (class value))))))
+(defn render [sep value urlencoder explode?]
+  (let [exploder (if explode? explode unexplode)]
+    (cond
+     (nil? value)        ""
+     (instance?          java.lang.String value) (urlencoder value)
+     (number? value)     (urlencoder value)
+     (map? value)        (exploder value sep urlencoder)
+     (sequential? value) (unexplode value sep urlencoder)
+     :else (throw
+            (new UnsupportedOperationException
+                 (str "unsupported type " (class value)))))))
 
 (defn truncate-to [str requested-len]
   (let [len (min requested-len (count str))]
@@ -85,12 +86,12 @@
 ;; | allow |   U     U+R     U       U       U      U      U     U+R  |
 ;; `------------------------------------------------------------------'
 
-(defn- configurable-expander [part variables urlencoder]
+(defn configurable-expander [part variables urlencoder]
   (join ","
-        (remove empty?
-                (map #(truncate-to (:value %) (get % :maxlen 9999))
-                     (map #(assoc % :value (render "," (:value %) urlencoder))
-                          (map #(assoc % :value (value-of % variables)) (:vars part)))))))
+   (remove empty?
+    (map #(truncate-to (:value %) (get % :maxlen 9999))
+     (map #(assoc % :value (render "," (:value %) urlencoder (:explode %)))
+      (map #(assoc % :value (value-of % variables)) (:vars part)))))))
 
 (defmulti expand :type)
 
