@@ -57,7 +57,7 @@
 (defn render [sep value urlencoder explode?]
   (let [exploder (if explode? explode unexplode)]
     (cond
-     (nil? value)        ""
+     (nil? value)        nil
      (instance?          java.lang.String value) (urlencoder value)
      (number? value)     (urlencoder value)
      (map? value)        (exploder value sep urlencoder)
@@ -67,8 +67,9 @@
                  (str "unsupported type " (class value)))))))
 
 (defn truncate-to [str requested-len]
-  (let [len (min requested-len (count str))]
-    (.substring str 0 len)))
+  (if (nil? str)
+    nil
+    (.substring str 0 (min requested-len (count str)))))
 
 (defn value-of [variable variables]
   (let [name (keyword (:name variable))]
@@ -106,8 +107,7 @@
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
-  (let [expansion
-        (join "," (remove empty? (expander part variables urlencode-reserved)))]
-    (if (empty? expansion)
-      expansion
-      (str "#" expansion))))
+  (let [expansion (expander part variables urlencode-reserved)]
+    (if (every? nil? expansion)
+      ""
+      (str "#" (join "," (remove empty? expansion))))))

@@ -19,6 +19,7 @@
   (is (= "foo" (render "" "foo" identity false))))
 
 (deftest truncate-to-test
+  (is (= nil (truncate-to nil 3)))
   (is (= "val" (truncate-to "value" 3)))
   (is (= "value" (truncate-to "value" 5)))
   (is (= "value" (truncate-to "value" 9999))))
