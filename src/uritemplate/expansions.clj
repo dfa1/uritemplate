@@ -85,13 +85,10 @@
 ;; | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
 ;; | allow |   U     U+R     U       U       U      U      U     U+R  |
 ;; `------------------------------------------------------------------'
-
-(defn configurable-expander [part variables urlencoder]
-  (join ","
-   (remove empty?
-    (map #(truncate-to (:value %) (get % :maxlen 9999))
-     (map #(assoc % :value (render "," (:value %) urlencoder (:explode %)))
-      (map #(assoc % :value (value-of % variables)) (:vars part)))))))
+(defn expander [part variables urlencoder]
+  (map #(truncate-to (:value %) (get % :maxlen 9999))
+       (map #(assoc % :value (render "," (:value %) urlencoder (:explode %)))
+            (map #(assoc % :value (value-of % variables)) (:vars part)))))
 
 (defmulti expand :type)
 
@@ -101,15 +98,16 @@
 
 (defmethod expand :simple [part variables]
   "Simple string expansion."
-  (configurable-expander part variables urlencode))
+  (join "," (remove empty? (expander part variables urlencode))))
 
 (defmethod expand :reserved [part variables]
   "Reserved expansion."
-  (configurable-expander part variables urlencode-reserved))
+  (join "," (remove empty? (expander part variables urlencode-reserved))))
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
-  (let [expansion (configurable-expander part variables urlencode-reserved)]
+  (let [expansion
+        (join "," (remove empty? (expander part variables urlencode-reserved)))]
     (if (empty? expansion)
       expansion
       (str "#" expansion))))
