@@ -46,7 +46,7 @@
   (apply str (interpose sep coll)))
 
 (defn unexplode [coll sep urlencoder]
-  (join sep (map urlencoder (flatten (seq coll)))))
+  (join "," (map urlencoder (flatten (seq coll)))))
 
 (defn kv [[key value] urlencoder]
   (str key "=" (urlencoder value)))
@@ -86,9 +86,9 @@
 ;; | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
 ;; | allow |   U     U+R     U       U       U      U      U     U+R  |
 ;; `------------------------------------------------------------------'
-(defn expander [part variables urlencoder]
+(defn expander [part variables urlencoder sep]
   (map #(truncate-to (:value %) (get % :maxlen 9999))
-       (map #(assoc % :value (render "," (:value %) urlencoder (:explode %)))
+       (map #(assoc % :value (render sep (:value %) urlencoder (:explode %)))
             (map #(assoc % :value (value-of % variables)) (:vars part)))))
 
 (defmulti expand :type)
@@ -99,15 +99,29 @@
 
 (defmethod expand :simple [part variables]
   "Simple string expansion."
-  (join "," (remove empty? (expander part variables urlencode))))
+  (join "," (remove empty? (expander part variables urlencode ","))))
 
 (defmethod expand :reserved [part variables]
   "Reserved expansion."
-  (join "," (remove empty? (expander part variables urlencode-reserved))))
+  (join "," (remove empty? (expander part variables urlencode-reserved ","))))
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
-  (let [expansion (expander part variables urlencode-reserved)]
+  (let [expansion (expander part variables urlencode-reserved ",")]
     (if (every? nil? expansion)
       ""
       (str "#" (join "," (remove empty? expansion))))))
+
+(defmethod expand :dot [part variables]
+  "Dot expansion."
+  (let [expansion (expander part variables urlencode ".")]
+    (if (every? nil? expansion)
+      ""
+      (str "." (join "." (remove empty? expansion))))))
+
+(defmethod expand :path [part variables]
+  "Path segment expansion."
+  (let [expansion (expander part variables urlencode "/")]
+    (if (every? nil? expansion)
+      ""
+      (str "/" (join "/" (remove empty? expansion))))))

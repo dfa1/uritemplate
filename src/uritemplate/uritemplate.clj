@@ -45,7 +45,9 @@
     (cond
      (= \+ operator) (parse-as :reserved (.substring variable-list 1)) 
      (= \# operator) (parse-as :fragment (.substring variable-list 1))
-     :else           (parse-as :simple variable-list))))
+     (= \. operator) (parse-as :dot      (.substring variable-list 1))
+     (= \/ operator) (parse-as :path     (.substring variable-list 1))
+     :else           (parse-as :simple   variable-list))))
 
 (defn parse [token]
   (let [valid-expression #"\{\S+\}"]
@@ -57,7 +59,7 @@
   (flatten (map parse tokens)))
 
 (defn lexer [template]
-  (re-seq #"\{[^/\{]+\}|[^{}]+" template))
+  (re-seq #"\{[^\{]+\}|[^{}]+" template))
 
 (defn expand-all [parts variables]
   (apply str (map #(expand % variables) parts)))
@@ -65,3 +67,4 @@
 (defn uritemplate [template]
   (let [parts (parser (lexer template))]
     (fn [variables] (expand-all parts variables))))
+

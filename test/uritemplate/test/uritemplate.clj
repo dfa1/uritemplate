@@ -6,16 +6,24 @@
     (is (= nil (lexer ""))))
 
 (deftest lexer-accept-literal-string
-    (is (= '("www.example.com") (lexer "www.example.com"))))
+  (is (= '("www.example.com")
+         (lexer "www.example.com"))))
 
 (deftest lexer-accept-expression-string
-    (is (= '("{.dom*}") (lexer "{.dom*}"))))
+  (is (= '("{.dom*}")
+         (lexer "{.dom*}"))))
 
 (deftest lexer-accept-expressions-interleaved-by-literals
-    (is (= '("www" "{.dom*}" "/" "{context}") (lexer "www{.dom*}/{context}"))))
+  (is (= '("www" "{.dom*}" "/" "{context}")
+         (lexer "www{.dom*}/{context}"))))
 
 (deftest lexer-accept-consecutive-expressions
-  (is (= '("up" "{+path}" "{var}" "/here") (lexer "up{+path}{var}/here"))))
+  (is (= '("up" "{+path}" "{var}" "/here")
+         (lexer "up{+path}{var}/here"))))
+
+(deftest lexer-accept-expressions-with-slash
+  (is (= '("{/path}")
+         (lexer "{/path}"))))
 
 
 (deftest get-variable-list-test
