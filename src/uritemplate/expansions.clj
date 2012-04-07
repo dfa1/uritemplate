@@ -45,23 +45,18 @@
 (defn join [sep coll]
   (apply str (interpose sep coll)))
 
-(defn unexplode [sep coll urlencoder]
-  (join sep (map urlencoder (flatten (seq coll)))))
+(defn kv [kv_sep [key value] urlencoder]
+  (str key kv_sep (urlencoder value)))
 
-(defn kv [[key value] urlencoder]
-  (str key "=" (urlencoder value)))
-
-(defn explode [sep coll urlencoder]
-  (join sep (map #(kv % urlencoder) (seq coll))))
-
-(defn render [sep value urlencoder explode?]
-  (let [exploder (if explode? explode unexplode)]
+(defn render [wanted_sep value urlencoder explode?]
+  (let [sep    (if explode? wanted_sep ",")
+        kv_sep (if explode? "="        ",")]
     (cond
      (nil? value)        nil
      (instance?          java.lang.String value) (urlencoder value)
      (number? value)     (urlencoder value)
-     (map? value)        (exploder sep value urlencoder)
-     (sequential? value) (unexplode sep value urlencoder)
+     (map? value)        (join sep (map #(kv kv_sep % urlencoder) (seq value)))
+     (sequential? value) (join sep (map urlencoder value))
      :else (throw
             (new UnsupportedOperationException
                  (str "unsupported type " (class value)))))))
@@ -105,7 +100,7 @@
 (defmethod expand :reserved [part variables]
   "Reserved expansion."
   (let [sep ","]
-    (join sep (remove empty? (expander sep part variables urlencode-reserved)))))
+    (join sep (expander sep part variables urlencode-reserved))))
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
@@ -114,7 +109,7 @@
         expansion (expander sep part variables urlencode-reserved)]
     (if (every? nil? expansion)
       ""
-      (str first (join sep (remove empty? expansion))))))
+      (str first (join sep expansion)))))
 
 (defmethod expand :dot [part variables]
   "Dot expansion."
@@ -123,13 +118,11 @@
         expansion (expander sep part variables urlencode)]
     (if (every? nil? expansion)
       ""
-      (str first (join sep (remove empty? expansion))))))
+      (str first (join sep (remove nil? expansion))))))
 
 (defmethod expand :path [part variables]
   "Path segment expansion."
   (let [first "/"
         sep "/"
-        expansion (expander sep part variables urlencode )]
-    (if (every? nil? expansion)
-      ""
-      (str first (join sep (remove empty? expansion))))))
+        expansion (expander sep part variables urlencode)]
+      (str first (join sep (remove nil? expansion)))))

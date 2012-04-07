@@ -26,7 +26,7 @@
 
 (defmacro expansion [template expected]
   `(let [compiled-template# (uritemplate ~template)
-         got# (compiled-template# example-variables)]
+        got# (compiled-template# example-variables)]
      (is (= ~expected got#) (format "template: \"%s\"" ~template))))
 
 (deftest simple-string-expansion ; section 3.2.2
@@ -92,9 +92,10 @@
   (expansion "X{.list}"        "X.red,green,blue")
   (expansion "X{.list*}"       "X.red.green.blue")
   (expansion "X{.keys}"        "X.dot,.,semi,%3B,comma,%2C")
-  (expansion "X{.keys*}"       "X.dot=..semi=%3B.comma=%2C")
-  (expansion "X{.empty_keys}"  "X")
-  (expansion "X{.empty_keys*}" "X"))
+  (expansion "X{.keys*}"       "X.dot=..semi=%3B.comma=%2C"))
+;; FIXME: variable empty_keys is not defined in RFC 
+;(expansion "X{.empty_keys}"  "X")
+;(expansion "X{.empty_keys*}" "X")
 
 (deftest path-segment-expansion ; section 3.2.6
   (expansion "{/who}"          "/fred")

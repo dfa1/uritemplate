@@ -20,6 +20,8 @@
 
 (deftest truncate-to-test
   (is (= nil (truncate-to nil 0)))
+  (is (= "" (truncate-to "" 0)))
+  (is (= "" (truncate-to "" 1)))
   (is (= "val" (truncate-to "value" 3)))
   (is (= "value" (truncate-to "value" 5)))
   (is (= "value" (truncate-to "value" 9999))))
@@ -28,6 +30,3 @@
   (is (= "val" (expand {:type :simple :vars [{:name "var" :maxlen 3}]}
                        {:var "value"} ))))
 
-(deftest explode-test
-  (let [keys {"semi" ";" "dot" "." "comma" ","}]
-    (is (= "dot=.,semi=%3B,comma=%2C" (explode "," keys urlencode)))))
