@@ -15,8 +15,8 @@
   (is (= "hello%20world!" (urlencode-reserved "hello world!"))))
 
 (deftest render-test
-  (is (= "1,2,3" (render "," '(1 2 3) identity false)))
-  (is (= "foo" (render "" "foo" identity false))))
+  (is (= "1,2,3" (render "," '(1 2 3) identity false 4)))
+  (is (= "foo" (render "" "foo" identity false 3))))
 
 (deftest truncate-to-test
   (is (= nil (truncate-to nil 0)))

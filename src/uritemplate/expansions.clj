@@ -48,23 +48,26 @@
 (defn kv [kv_sep [key value] urlencoder]
   (str key kv_sep (urlencoder value)))
 
-(defn render [wanted_sep value urlencoder explode?]
+(defn truncate-to [str requested-len]
+  (if (nil? str)
+    nil
+    (.substring str 0 (min requested-len (count str)))))
+
+(defn str? [obj]
+  (instance? java.lang.String obj))
+
+(defn render [wanted_sep value urlencoder explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
         kv_sep (if explode? "="        ",")]
     (cond
      (nil? value)        nil
-     (instance?          java.lang.String value) (urlencoder value)
-     (number? value)     (urlencoder value)
+     (str? value)        (urlencoder (truncate-to value max-len))
+     (number? value)     (urlencoder (truncate-to value max-len))
      (map? value)        (join sep (map #(kv kv_sep % urlencoder) (seq value)))
      (sequential? value) (join sep (map urlencoder value))
      :else (throw
             (new UnsupportedOperationException
                  (str "unsupported type " (class value)))))))
-
-(defn truncate-to [str requested-len]
-  (if (nil? str)
-    nil
-    (.substring str 0 (min requested-len (count str)))))
 
 (defn value-of [variable variables]
   (let [name (keyword (:name variable))]
@@ -82,8 +85,8 @@
 ;; | allow |   U     U+R     U       U       U      U      U     U+R  |
 ;; `------------------------------------------------------------------'
 (defn expander [sep part variables urlencoder]
-  (map #(truncate-to (:value %) (get % :maxlen 9999))
-       (map #(assoc % :value (render sep (:value %) urlencoder (:explode %)))
+  (map :value
+       (map #(assoc % :value (render sep (:value %) urlencoder (:explode %) (get % :maxlen 9999)))
             (map #(assoc % :value (value-of % variables)) (:vars part)))))
 
 (defmulti expand :type)
@@ -125,4 +128,4 @@
   (let [first "/"
         sep "/"
         expansion (expander sep part variables urlencode)]
-      (str first (join sep (remove nil? expansion)))))
+    (str first (join sep (remove nil? expansion)))))

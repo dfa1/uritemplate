@@ -17,6 +17,7 @@ Generate uritemplates according to RFC 6570 (not fully compatible yet).
 - PCTs in literals 
 - handle missing } in templates
 - handle prefix together with explode
+- prefix is only applicable to string values
 - refactoring: check StringSeq vs java.lang.String usage
 - uriparser
     (let [example-parser (uri-parser "http://example.com/{role}/{user}")]
