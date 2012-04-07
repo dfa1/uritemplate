@@ -24,10 +24,10 @@
    :undef      nil
    })
 
-(defn- expansion [template expansion]
-  (let [compiled-template (uritemplate template)]
-    (is (= expansion (compiled-template example-variables))
-        (str "failed expansion of '" template "'"))))
+(defn- expansion [template expected]
+  (let [compiled-template (uritemplate template)
+        got (compiled-template example-variables)]
+    (is (= expected got) (format "template: \"%s\"" template))))
 
 (deftest simple-string-expansion ; section 3.2.2
   (expansion "{var}"       "value")
