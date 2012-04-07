@@ -30,4 +30,4 @@
 
 (deftest explode-test
   (let [keys {"semi" ";" "dot" "." "comma" ","}]
-    (is (= "dot=.,semi=%3B,comma=%2C" (explode keys "," urlencode)))))
+    (is (= "dot=.,semi=%3B,comma=%2C" (explode "," keys urlencode)))))

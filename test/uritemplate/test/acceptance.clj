@@ -109,5 +109,5 @@
   (expansion "{/list}"         "/red,green,blue")
   (expansion "{/list*}"        "/red/green/blue")
   (expansion "{/list*,path:4}" "/red/green/blue/%2Ffoo")
-  (expansion "{/keys}"         "/semi,%3B,dot,.,comma,%2C")
-  (expansion "{/keys*}"        "/semi=%3B/dot=./comma=%2C"))
+  (expansion "{/keys}"         "/dot,.,semi,%3B,comma,%2C")
+  (expansion "{/keys*}"        "/dot=./semi=%3B/comma=%2C"))

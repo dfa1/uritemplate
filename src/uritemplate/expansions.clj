@@ -45,13 +45,13 @@
 (defn join [sep coll]
   (apply str (interpose sep coll)))
 
-(defn unexplode [coll sep urlencoder]
-  (join "," (map urlencoder (flatten (seq coll)))))
+(defn unexplode [sep coll urlencoder]
+  (join sep (map urlencoder (flatten (seq coll)))))
 
 (defn kv [[key value] urlencoder]
   (str key "=" (urlencoder value)))
 
-(defn explode [coll sep urlencoder]
+(defn explode [sep coll urlencoder]
   (join sep (map #(kv % urlencoder) (seq coll))))
 
 (defn render [sep value urlencoder explode?]
@@ -60,8 +60,8 @@
      (nil? value)        nil
      (instance?          java.lang.String value) (urlencoder value)
      (number? value)     (urlencoder value)
-     (map? value)        (exploder value sep urlencoder)
-     (sequential? value) (unexplode value sep urlencoder)
+     (map? value)        (exploder sep value urlencoder)
+     (sequential? value) (unexplode sep value urlencoder)
      :else (throw
             (new UnsupportedOperationException
                  (str "unsupported type " (class value)))))))
@@ -86,7 +86,7 @@
 ;; | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
 ;; | allow |   U     U+R     U       U       U      U      U     U+R  |
 ;; `------------------------------------------------------------------'
-(defn expander [part variables urlencoder sep]
+(defn expander [sep part variables urlencoder]
   (map #(truncate-to (:value %) (get % :maxlen 9999))
        (map #(assoc % :value (render sep (:value %) urlencoder (:explode %)))
             (map #(assoc % :value (value-of % variables)) (:vars part)))))
@@ -99,29 +99,37 @@
 
 (defmethod expand :simple [part variables]
   "Simple string expansion."
-  (join "," (remove empty? (expander part variables urlencode ","))))
+  (let [sep ","]
+    (join sep (remove empty? (expander sep part variables urlencode)))))
 
 (defmethod expand :reserved [part variables]
   "Reserved expansion."
-  (join "," (remove empty? (expander part variables urlencode-reserved ","))))
+  (let [sep ","]
+    (join sep (remove empty? (expander sep part variables urlencode-reserved)))))
 
 (defmethod expand :fragment [part variables]
   "Fragment expansion."
-  (let [expansion (expander part variables urlencode-reserved ",")]
+  (let [first "#"
+        sep ","
+        expansion (expander sep part variables urlencode-reserved)]
     (if (every? nil? expansion)
       ""
-      (str "#" (join "," (remove empty? expansion))))))
+      (str first (join sep (remove empty? expansion))))))
 
 (defmethod expand :dot [part variables]
   "Dot expansion."
-  (let [expansion (expander part variables urlencode ".")]
+  (let [first "."
+        sep "."
+        expansion (expander sep part variables urlencode)]
     (if (every? nil? expansion)
       ""
-      (str "." (join "." (remove empty? expansion))))))
+      (str first (join sep (remove empty? expansion))))))
 
 (defmethod expand :path [part variables]
   "Path segment expansion."
-  (let [expansion (expander part variables urlencode "/")]
+  (let [first "/"
+        sep "/"
+        expansion (expander sep part variables urlencode )]
     (if (every? nil? expansion)
       ""
-      (str "/" (join "/" (remove empty? expansion))))))
+      (str first (join sep (remove empty? expansion))))))
