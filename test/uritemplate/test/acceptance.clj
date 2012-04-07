@@ -104,7 +104,7 @@
   (expansion "{/var}"          "/value")
   (expansion "{/var,empty}"    "/value/")
   (expansion "{/var,undef}"    "/value")
-  (expansion "{/var,x}"        "/here/value/1024/here")
+  (expansion "{/var,x}/here"   "/value/1024/here")
   (expansion "{/var:1,var}"    "/v/value")
   (expansion "{/list}"         "/red,green,blue")
   (expansion "{/list*}"        "/red/green/blue")
