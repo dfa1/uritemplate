@@ -14,7 +14,6 @@ Generate uritemplates according to RFC 6570 (not fully compatible yet).
 ## Todo
 
 
-- PCTs in literals 
 - simplify expansions.clj
 - error handling:
    + missing } in templates

@@ -152,3 +152,6 @@
   (expansion "{&keys}"          "&dot,.,keys=semi,%3B,comma,%2C")
   (expansion "{&keys*}"         "&dot=.semi=%3B&&comma=%2C"))
 
+(deftest variables-test ; section 2.3
+  (is (= "bar" ((uritemplate "{%66%6F%6F}") {(keyword "%66%6F%6F") "bar"}))))
+  

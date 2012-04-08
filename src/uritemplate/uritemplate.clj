@@ -39,7 +39,9 @@
 (defn parse-expression [expression]
   (let [variable-list (.substring expression 1 (dec (.length expression)))
         operator (.charAt variable-list 0)]
-    (cond ;; TODO: DRY
+    (cond 
+     ;; The operator characters equals ("="), comma (","), exclamation ("!"),
+     ;; at sign ("@"), and pipe ("|") are reserved for future extensions.
      (= \+ operator) (parse-as :reserved  (.substring variable-list 1)) 
      (= \# operator) (parse-as :fragment  (.substring variable-list 1))
      (= \. operator) (parse-as :dot       (.substring variable-list 1))
