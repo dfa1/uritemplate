@@ -44,7 +44,15 @@
   (urlencode-but (in? reserved unreserved) string))
 
 (defn join [sep coll]
+  "Joins coll with sep."
   (apply str (interpose sep coll)))
+
+(defn join-with-prefix [prefix sep coll]
+  "As join but prepending prefix iff when result is not empty."
+  (let [filtered-coll (remove nil? coll)]
+    (if (= 0 (count filtered-coll))
+      ""
+      (str prefix (join sep filtered-coll)))))
 
 (defn kv [kv_sep [key value] urlencoder]
   (str key kv_sep (urlencoder value)))
@@ -73,15 +81,11 @@
   (let [name (keyword (:name variable))]
     (name variables)))
 
+;; FIXME: this function needs some love
 (defn expander [sep part variables urlencoder]
   (map :value
        (map #(assoc % :value (render sep (:value %) urlencoder (:explode %) (get % :maxlen 9999)))
             (map #(assoc % :value (value-of % variables)) (:vars part)))))
-
-(defn prepend-prefix [first sep expansion]
-  (if (every? nil? expansion)
-    ""
-    (str first (join sep (remove nil? expansion)))))
 
 ;; RFC 6570
 ;; Appendix A
@@ -114,15 +118,15 @@
 (defmethod expand :fragment [part variables]
   "Fragment expansion. See # in Appendix A."
   (let [first "#" sep "," urlencoder urlencode-reserved]
-    (prepend-prefix first sep (expander sep part variables urlencoder))))
+    (join-with-prefix first sep (expander sep part variables urlencoder))))
 
 (defmethod expand :dot [part variables]
   "Dot expansion. See . in Appendix A."
   (let [first "." sep "." urlencoder urlencode]
-    (prepend-prefix first sep (expander sep part variables urlencoder))))
+    (join-with-prefix first sep (expander sep part variables urlencoder))))
 
 (defmethod expand :path [part variables]
   "Path segment expansion. See / in Appendix A."
   (let [first "/" sep "/" urlencoder urlencode]
-    (prepend-prefix first sep (expander sep part variables urlencoder))))
+    (join-with-prefix first sep (expander sep part variables urlencoder))))
 

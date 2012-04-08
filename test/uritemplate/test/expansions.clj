@@ -2,6 +2,20 @@
   (:use [uritemplate.expansions])
   (:use [clojure.test]))
 
+(deftest join-test
+  (is (= "" (join "," [])))
+  (is (= "a" (join "," ["a"])))
+  (is (= "a,b" (join "," ["a","b"]))))
+
+(deftest join-with-prefix-test
+  (is (= "" (join-with-prefix "/" "," [])))
+  (is (= "" (join-with-prefix "/" "," [nil])))
+  (is (= "/" (join-with-prefix "/" "," [""])))
+  (is (= "/a" (join-with-prefix "/" "," [nil, "a"])))
+  (is (= "/a" (join-with-prefix "/" "," ["a", nil])))
+  (is (= "/a" (join-with-prefix "/" "," ["a"])))
+  (is (= "/a,b" (join-with-prefix "/" "," ["a","b"]))))
+
 (deftest pct-encode-test
   (is (= "%20" (pct-encode \space)))
   (is (= "%2F" (pct-encode \/))))
