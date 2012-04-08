@@ -54,8 +54,13 @@
       ""
       (str prefix (join sep filtered-coll)))))
 
-(defn kv [kv_sep [key value] urlencoder]
-  (str key kv_sep (urlencoder value)))
+(defn kv [kvsep [key value] urlencoder]
+  (str key kvsep (urlencoder value)))
+
+(defn render-map [sep kvsep m urlencoder]
+  "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
+  (let [kvs (seq m)]
+    (join sep (map #(kv kvsep % urlencoder) kvs))))
 
 (defn truncate [string len]
   "Make sure string does not exceed len."
@@ -71,12 +76,12 @@
 
 (defn render [wanted_sep value urlencoder explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
-        kv_sep (if explode? "="        ",")]
+        kvsep (if explode? "="        ",")]
     (cond
      (nil? value)        nil
      (str? value)        (urlencoder (truncate value max-len))
      (number? value)     (urlencoder (truncate (str value) max-len))
-     (map? value)        (join sep (map #(kv kv_sep % urlencoder) (seq value)))
+     (map? value)        (render-map sep kvsep value urlencoder)
      (sequential? value) (join sep (map urlencoder value))
      :else               (unsupported-value value))))
 
@@ -95,14 +100,14 @@
 
 (defn name-render [wanted_sep ifemp name value explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
-        kv_sep (if explode? "="        ",")]
+        kvsep  (if explode? "="        ",")]
     (cond
      (nil? value)        nil
      (str? value)        (with-name name (urlencode (truncate value max-len)) ifemp)
      (number? value)     (with-name name (urlencode (truncate (str value) max-len)) ifemp)
      (map? value)        (if explode?
-                           (join sep (map #(kv kv_sep % urlencode) (seq value)))
-                           (str name "=" (join sep (map #(kv kv_sep % urlencode) (seq value)))))
+                           (render-map sep kvsep value urlencode)
+                           (str name "=" (render-map sep kvsep value urlencode)))
      (sequential? value) (if explode?
                            (join sep (map #(str name "=" (urlencode %)) value))
                            (str name "=" (join sep (map urlencode value))))
