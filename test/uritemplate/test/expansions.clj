@@ -32,6 +32,10 @@
   (is (= "1,2,3" (render "," '(1 2 3) identity false 4)))
   (is (= "foo" (render "" "foo" identity false 3))))
 
+(deftest name-render-test
+  (is (= "list=foo;list=bar"
+         (name-render ";" "list" ["foo", "bar"] str true 200))))
+
 (deftest truncate-to-test
   (is (= "" (truncate "" 0)))
   (is (= "" (truncate "" 1)))
@@ -40,6 +44,11 @@
   (is (= "value" (truncate "value" 9999))))
 
 (deftest simple-expansion-test
-  (is (= "val" (expand {:type :simple :vars [{:name "var" :maxlen 3}]}
-                       {:var "value"} ))))
+  (is (= "val"
+         (expand {:type :simple :vars [{:name "var" :maxlen 3}]} {:var "value"}))))
+
+(deftest form-expansion-test
+  (is (= "&var=value"
+         (expand {:type :formcont :vars [{:name "var" }]} {:var "value"}))))
+
 

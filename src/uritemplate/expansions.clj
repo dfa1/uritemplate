@@ -64,6 +64,11 @@
 (defn str? [obj]
   (instance? java.lang.String obj))
 
+(defn unsupported-value [value]
+  (throw
+   (UnsupportedOperationException.
+    (format  "unsupported type '%s'" (class value)))))
+
 (defn render [wanted_sep value urlencoder explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
         kv_sep (if explode? "="        ",")]
@@ -73,19 +78,44 @@
      (number? value)     (urlencoder (truncate (str value) max-len))
      (map? value)        (join sep (map #(kv kv_sep % urlencoder) (seq value)))
      (sequential? value) (join sep (map urlencoder value))
-     :else (throw
-            (new UnsupportedOperationException
-                 (str "unsupported type " (class value)))))))
+     :else               (unsupported-value value))))
 
 (defn value-of [variable variables]
   (let [name (keyword (:name variable))]
     (name variables)))
 
-;; FIXME: this function needs some love
 (defn expander [sep part variables urlencoder]
-  (map :value
-       (map #(assoc % :value (render sep (:value %) urlencoder (:explode %) (get % :maxlen 9999)))
-            (map #(assoc % :value (value-of % variables)) (:vars part)))))
+  (map #(render sep (:value %) urlencoder (:explode %) (:maxlen % 9999))
+       (map #(assoc % :value (value-of % variables)) (:vars part))))
+
+(defn with-name [name value]
+  (if (empty? value)
+    (str name)
+    (str name "=" value)))
+
+(defn name-render [wanted_sep name value ifemp explode? max-len]
+  (let [sep    (if explode? wanted_sep ",")
+        kv_sep (if explode? "="        ",")]
+    (cond
+     (nil? value)        nil
+     (str? value)        (with-name name (urlencode (truncate value max-len)))
+     (number? value)     (with-name name (urlencode (truncate (str value) max-len)))
+     (map? value)        (str name "=" (join sep (map #(kv kv_sep % urlencode) (seq value))))
+     (sequential? value) (if explode?
+                           (join sep (map #(str name "=" (urlencode %)) value))
+                           (str name "=" (join sep (map urlencode value))))
+     :else               (unsupported-value value))))
+
+(defn name-expander [sep part variables urlencoder]
+  (map #(name-render
+         sep
+         (:name %)
+         (value-of % variables)
+         urlencoder
+         (:explode %)
+         (:maxlen % 9999)
+         )
+       (:vars part)))
 
 ;; RFC 6570
 ;; Appendix A
@@ -129,4 +159,19 @@
   "Path segment expansion. See / in Appendix A."
   (let [first "/" sep "/" urlencoder urlencode]
     (join-with-prefix first sep (expander sep part variables urlencoder))))
+
+(defmethod expand :pathparam [part variables]
+  "Path parameter expansion. See ; in Appendix A."
+  (let [first ";" sep ";" urlencoder urlencode]
+    (join-with-prefix first sep (name-expander sep part variables urlencoder))))
+
+(defmethod expand :form [part variables]
+  "Form expansion. See ? in Appendix A."
+  (let [first "?" sep "&" urlencoder urlencode]
+    (join-with-prefix first sep (name-expander sep part variables urlencoder))))
+
+(defmethod expand :formcont [part variables]
+  "Form continuation expansion. See & in Appendix A."
+  (let [first "&" sep "&" urlencoder urlencode]
+    (join-with-prefix first sep (name-expander sep part variables urlencoder))))
 

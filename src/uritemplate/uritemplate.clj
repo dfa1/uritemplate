@@ -36,18 +36,18 @@
 (defn parse-literal [token]
   {:type :literal :value token})
 
-(defn get-variable-list [expression]
-  (.substring expression 1 (dec (.length expression))))
-
 (defn parse-expression [expression]
-  (let [variable-list (get-variable-list expression)
+  (let [variable-list (.substring expression 1 (dec (.length expression)))
         operator (.charAt variable-list 0)]
-    (cond
-     (= \+ operator) (parse-as :reserved (.substring variable-list 1)) 
-     (= \# operator) (parse-as :fragment (.substring variable-list 1))
-     (= \. operator) (parse-as :dot      (.substring variable-list 1))
-     (= \/ operator) (parse-as :path     (.substring variable-list 1))
-     :else           (parse-as :simple   variable-list))))
+    (cond ;; TODO: DRY
+     (= \+ operator) (parse-as :reserved  (.substring variable-list 1)) 
+     (= \# operator) (parse-as :fragment  (.substring variable-list 1))
+     (= \. operator) (parse-as :dot       (.substring variable-list 1))
+     (= \/ operator) (parse-as :path      (.substring variable-list 1))
+     (= \; operator) (parse-as :pathparam (.substring variable-list 1))
+     (= \? operator) (parse-as :form      (.substring variable-list 1))
+     (= \& operator) (parse-as :formcont  (.substring variable-list 1))
+     :else           (parse-as :simple    variable-list))))
 
 (defn parse [token]
   (let [valid-expression #"\{\S+\}"]

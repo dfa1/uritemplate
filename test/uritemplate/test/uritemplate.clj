@@ -25,15 +25,6 @@
   (is (= '("{/path}")
          (lexer "{/path}"))))
 
-
-(deftest get-variable-list-test
-  (is (= ""         (get-variable-list "{}")))
-  (is (= "foo"      (get-variable-list "{foo}")))
-  (is (= "foo*"     (get-variable-list "{foo*}")))
-  (is (= "foo:10"   (get-variable-list "{foo:10}")))
-  (is (= "foo,bar"  (get-variable-list "{foo,bar}"))))
-
-
 (deftest variable-exploding
   (is (= {:explode true :name "foo"} (parse-variable "foo*"))))
 

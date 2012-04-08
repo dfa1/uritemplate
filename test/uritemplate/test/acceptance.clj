@@ -112,3 +112,43 @@
   (expansion "{/list*,path:4}" "/red/green/blue/%2Ffoo")
   (expansion "{/keys}"         "/dot,.,semi,%3B,comma,%2C")
   (expansion "{/keys*}"        "/dot=./semi=%3B/comma=%2C"))
+
+(deftest path-param-expansion ; section 3.2.7
+  (expansion "{;who}"            ";who=fred")
+  (expansion "{;half}"           ";half=50%25")
+  (expansion "{;empty}"          ";empty")
+  (expansion "{;v,empty,who}"    ";v=6;empty;who=fred")
+  (expansion "{;v,bar,who}"      ";v=6;who=fred")
+  (expansion "{;x,y}"            ";x=1024;y=768")
+  (expansion "{;x,y,empty}"      ";x=1024;y=768;empty")
+  (expansion "{;x,y,undef}"      ";x=1024;y=768")
+  (expansion "{;hello:5}"        ";hello=Hello")
+  (expansion "{;list}"           ";list=red,green,blue")
+  (expansion "{;list*}"          ";list=red;list=green;list=blue")
+  (expansion "{;keys}"           ";keys=semi,%3B,dot,.,comma,%2C")
+  (expansion "{;keys*}"          ";semi=%3B;dot=.;comma=%2C"))
+
+(deftest form-expansion ; section 3.2.8
+  (expansion "{?who}"            "?who=fred")
+  (expansion "{?half}"           "?half=50%25")
+  (expansion "{?x,y}"            "?x=1024&y=768")
+  (expansion "{?x,y,empty}"      "?x=1024&y=768&empty=")
+  (expansion "{?x,y,undef}"      "?x=1024&y=768")
+  (expansion "{?var:3}"          "?var=val")
+  (expansion "{?list}"           "?list=red,green,blue")
+  (expansion "{?list*}"          "?list=red&list=green&list=blue")
+  (expansion "{?keys}"           "?keys=dot,.,semi,%3B,comma,%2C")
+  (expansion "{?keys*}"          "?dot=.&semi=%3B&comma=%2C")) 
+
+(deftest form-continuation ; section 3.2.9
+  (expansion "{&who}"           "&who=fred")
+  (expansion "{&half}"          "&half=50%25")
+  (expansion "?fixed=yes{&x}"   "?fixed=yes&x=1024")
+  (expansion "{&x,y,empty}"     "&x=1024&y=768&empty=")
+  (expansion "{&x,y,undef}"     "&x=1024&y=768")
+  (expansion "{&var:3}"         "&var=val")
+  (expansion "{&list}"          "&list=red,green,blue")
+  (expansion "{&list*}"         "&list=red&list=green&list=blue")
+  (expansion "{&keys}"          "&dot,.,keys=semi,%3B,comma,%2C")
+  (expansion "{&keys*}"         "&dot=.semi=%3B&&comma=%2C"))
+
