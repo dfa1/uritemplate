@@ -2,73 +2,32 @@
   (:use [uritemplate.uritemplate])
   (:use [clojure.test]))
 
-(deftest lexer-accept-empty-string
-    (is (= nil (lexer ""))))
+(deftest lexer-test
+  (is (= nil (lexer "")))
+  (is (= ["www.example.com"] (lexer "www.example.com")))
+  (is (= ["{.dom*}"] (lexer "{.dom*}")))
+  (is (= ["www" "{.dom*}" "/" "{context}"] (lexer "www{.dom*}/{context}")))
+  (is (= ["up" "{+path}" "{var}" "/here"] (lexer "up{+path}{var}/here")))
+  (is (= ["{/path}"] (lexer "{/path}"))))
 
-(deftest lexer-accept-literal-string
-  (is (= '("www.example.com")
-         (lexer "www.example.com"))))
+(deftest variables-test
+  (is (= {:explode true :name "foo"} (parse-variable "foo*")))
+  (is (= {:name "foo" :maxlen 123} (parse-variable "foo:123")))
+  (is (thrown? AssertionError (parse-variable "foo:10000")))
+  (is (thrown? AssertionError (parse-variable "foo:0")))
+  (is (= [{:name "foo"}] (parse-variable-list "foo")))
+  (is (= [{:name "foo"} {:name "bar"}] (parse-variable-list "foo,bar"))))
 
-(deftest lexer-accept-expression-string
-  (is (= '("{.dom*}")
-         (lexer "{.dom*}"))))
+(deftest literal-test
+  (is (= {:type :literal :value "http://example.com"}
+         (parse "http://example.com"))))
 
-(deftest lexer-accept-expressions-interleaved-by-literals
-  (is (= '("www" "{.dom*}" "/" "{context}")
-         (lexer "www{.dom*}/{context}"))))
+(deftest simple-expression-test
+  (is (= {:type :simple :vars [{:name "foo"}]} (parse "{foo}")))
+  (is (= {:type :simple :vars [{:name "foo"} {:name "bar"}]} (parse "{foo,bar}"))))
 
-(deftest lexer-accept-consecutive-expressions
-  (is (= '("up" "{+path}" "{var}" "/here")
-         (lexer "up{+path}{var}/here"))))
+(deftest reserved-expression-test
+  (is (= {:type :reserved :vars [{:name "foo"} {:name "bar"}]} (parse "{+foo,bar}"))))
 
-(deftest lexer-accept-expressions-with-slash
-  (is (= '("{/path}")
-         (lexer "{/path}"))))
-
-(deftest variable-exploding
-  (is (= {:explode true :name "foo"} (parse-variable "foo*"))))
-
-(deftest variable-prefix-maxlen-is-saved
-  (is (= {:name "foo" :maxlen 123} (parse-variable "foo:123"))))
-
-(deftest variable-maxlen-must-be-less-than-10000
-  (is (thrown? AssertionError (parse-variable "foo:10000"))))
-
-(deftest variable-maxlen-must-be-positive
-  (is (thrown? AssertionError (parse-variable "foo:0"))))
-
-(deftest variable-simple
-  (is (= {:name "foo"} (parse-variable "foo"))))
-
-(deftest accept-singleton-variable
-  (is (= '({:name "foo"})
-         (parse-variable-list "foo"))))
-
-(deftest accept-multiple-variables
-  (is (= '({:name "foo"} {:name "bar"})
-         (parse-variable-list "foo,bar"))))
-
-
-(deftest accept-literal
-  (is (= {:type :literal :value "http://example.com"} (parse "http://example.com"))))
-
-(deftest accept-simple-expression
-  (is (= {:type :simple :vars [{:name "foo"}]}
-         (parse "{foo}"))))
-
-(deftest accept-simple-expression-with-two-variables
-  (is (= {:type :simple :vars [{:name "foo"} {:name "bar"}]}
-         (parse "{foo,bar}"))))
-
-(deftest accept-reserved-expression-with-two-variables
-  (is (= {:type :reserved :vars [{:name "foo"} {:name "bar"}]}
-         (parse "{+foo,bar}"))))
-
-(deftest accept-expression-without-variables
-  (is (= {:type :literal :value "{}"}
-         (parse "{}"))))
-
-(deftest readme-example
-  (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
-    (is (= "http://bitbucket.org/dfa/uritemplate"
-           (bitbucket {:user "dfa" :project "uritemplate"})))))
+(deftest expression-test
+  (is (= {:type :literal :value "{}"} (parse "{}"))))

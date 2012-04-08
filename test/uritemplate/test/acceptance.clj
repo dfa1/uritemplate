@@ -155,3 +155,7 @@
 (deftest variables-test ; section 2.3
   (is (= "bar" ((uritemplate "{%66%6F%6F}") {(keyword "%66%6F%6F") "bar"}))))
   
+(deftest readme-example
+  (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
+    (is (= "http://bitbucket.org/dfa/uritemplate"
+           (bitbucket {:user "dfa" :project "uritemplate"})))))
