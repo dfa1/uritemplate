@@ -10,37 +10,38 @@
         (char-range \A \Z)
         (char-range \a \z)
         (char-range \0 \9)
-        '(\- \_ \. \~))))
+        [\- \_ \. \~])))
 
 (def reserved
   "Don't pct-encode these character on + and # expansion."
-  (set '(\! \* \' \( \) \; \: \@ \& \= \+ \$ \, \/ \? \# \[ \])))
-
-(defn unreserved? [ch]
-  (contains? unreserved ch))
-
-(defn reserved? [ch]
-  (contains? reserved ch))
+  (set [\! \* \' \( \) \; \: \@ \& \= \+ \$ \, \/ \?  \[ \] \#]))
 
 (defn pct-encode [ch]
   "Unconditionally percent encode input character."
   (str "%" (.toUpperCase (Integer/toHexString (int ch)))))
 
-(defn skip-pct-encode-if [pred ch]
+(defn pct-encode-but [pred ch]
+  "Don't percent encode if pred yields true."
   (if (pred ch)
     (str ch)
     (pct-encode ch)))
 
-(defn configurable-urlencode [value pred]
-  (apply str (map #(skip-pct-encode-if pred %) (str value))))
+(defn urlencode-but [pred string]
+  "Url encode string, skipping a character when pred yields true."
+  (apply str (map #(pct-encode-but pred %) string)))
 
-(defn urlencode [value]
-  "url-encode only non-reserved characters."
-  (configurable-urlencode value unreserved?))
+(defn in? [& colls]
+  "Factory (or (contains? coll1 key) (contains? coll2 key) ..etc)."
+  (fn [key]
+    (some #(contains? % key) colls)))
 
-(defn urlencode-reserved [value]
-  "url-encode reserved as well as non-reserved characters."
-  (configurable-urlencode value (fn [ch] (or (reserved? ch) (unreserved? ch)))))
+(defn urlencode [string]
+  "url encode all but unreserved characters."
+  (urlencode-but (in? unreserved) string))
+
+(defn urlencode-reserved [string]
+  "url encode all but reserved and unreserved characters."
+  (urlencode-but (in? reserved unreserved) string))
 
 (defn join [sep coll]
   (apply str (interpose sep coll)))
@@ -62,7 +63,7 @@
     (cond
      (nil? value)        nil
      (str? value)        (urlencoder (truncate-to value max-len))
-     (number? value)     (urlencoder (truncate-to value max-len))
+     (number? value)     (urlencoder (truncate-to (str value) max-len))
      (map? value)        (join sep (map #(kv kv_sep % urlencoder) (seq value)))
      (sequential? value) (join sep (map urlencoder value))
      :else (throw
@@ -77,7 +78,6 @@
   (map :value
        (map #(assoc % :value (render sep (:value %) urlencoder (:explode %) (get % :maxlen 9999)))
             (map #(assoc % :value (value-of % variables)) (:vars part)))))
-
 
 (defn prepend-prefix [first sep expansion]
   (if (every? nil? expansion)
