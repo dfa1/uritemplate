@@ -14,12 +14,6 @@
 (defn parse-variable-explode [variable]
   {:name (.substring variable 0 (dec (.length variable))) :explode true})
 
-;; FIXME: handle prefix + explode together
-;; FIXME: ABNF rules for varname sec 2.3:
-;;     variable-list =  varspec *( "," varspec )
-;;     varspec       =  varname [ modifier-level4 ]
-;;     varname       =  varchar *( ["."] varchar )
-;;     varchar       =  ALPHA / DIGIT / "_" / pct-encoded
 (defn parse-variable [variable]
   (cond
    (.contains variable "*") (parse-variable-explode variable)

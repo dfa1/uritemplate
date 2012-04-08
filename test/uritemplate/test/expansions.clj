@@ -34,7 +34,9 @@
 
 (deftest name-render-test
   (is (= "list=foo;list=bar"
-         (name-render ";" "list" ["foo", "bar"] str true 200))))
+         (name-render ";" "" "list" ["foo", "bar"] true 200)))
+  (is (= "list=foo;list=bar"
+         (name-render ";" "" "list" ["foo", "bar"] true 200))))
 
 (deftest truncate-to-test
   (is (= "" (truncate "" 0)))

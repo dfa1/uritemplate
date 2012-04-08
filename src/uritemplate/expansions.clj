@@ -88,30 +88,30 @@
   (map #(render sep (:value %) urlencoder (:explode %) (:maxlen % 9999))
        (map #(assoc % :value (value-of % variables)) (:vars part))))
 
-(defn with-name [name value]
+(defn with-name [name value ifemp]
   (if (empty? value)
-    (str name)
+    (str name ifemp)
     (str name "=" value)))
 
-(defn name-render [wanted_sep name value ifemp explode? max-len]
+(defn name-render [wanted_sep ifemp name value explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
         kv_sep (if explode? "="        ",")]
     (cond
      (nil? value)        nil
-     (str? value)        (with-name name (urlencode (truncate value max-len)))
-     (number? value)     (with-name name (urlencode (truncate (str value) max-len)))
+     (str? value)        (with-name name (urlencode (truncate value max-len)) ifemp)
+     (number? value)     (with-name name (urlencode (truncate (str value) max-len)) ifemp)
      (map? value)        (str name "=" (join sep (map #(kv kv_sep % urlencode) (seq value))))
      (sequential? value) (if explode?
                            (join sep (map #(str name "=" (urlencode %)) value))
                            (str name "=" (join sep (map urlencode value))))
      :else               (unsupported-value value))))
 
-(defn name-expander [sep part variables urlencoder]
+(defn name-expander [sep ifemp part variables]
   (map #(name-render
          sep
+         ifemp
          (:name %)
          (value-of % variables)
-         urlencoder
          (:explode %)
          (:maxlen % 9999)
          )
@@ -162,16 +162,16 @@
 
 (defmethod expand :pathparam [part variables]
   "Path parameter expansion. See ; in Appendix A."
-  (let [first ";" sep ";" urlencoder urlencode]
-    (join-with-prefix first sep (name-expander sep part variables urlencoder))))
+  (let [first ";" sep ";" ifemp ""]
+    (join-with-prefix first sep (name-expander sep ifemp part variables))))
 
 (defmethod expand :form [part variables]
   "Form expansion. See ? in Appendix A."
-  (let [first "?" sep "&" urlencoder urlencode]
-    (join-with-prefix first sep (name-expander sep part variables urlencoder))))
+  (let [first "?" sep "&" ifemp "="]
+    (join-with-prefix first sep (name-expander sep ifemp part variables))))
 
 (defmethod expand :formcont [part variables]
   "Form continuation expansion. See & in Appendix A."
-  (let [first "&" sep "&" urlencoder urlencode]
-    (join-with-prefix first sep (name-expander sep part variables urlencoder))))
+  (let [first "&" sep "&" ifemp "="]
+    (join-with-prefix first sep (name-expander sep ifemp part variables))))
 
