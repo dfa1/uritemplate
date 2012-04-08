@@ -15,7 +15,7 @@
    :base       "http://example.com/home/"
    :path       "/foo/bar"
    :list       [ "red" "green" "blue" ]
-   :keys       {"semi" ";" "dot" "." "comma" ","}  
+   :keys       { "semi" ";" "dot" "." "comma" "," }
    :v          "6"
    :x          "1024"
    :y          "768"
@@ -125,8 +125,8 @@
   (expansion "{;hello:5}"        ";hello=Hello")
   (expansion "{;list}"           ";list=red,green,blue")
   (expansion "{;list*}"          ";list=red;list=green;list=blue")
-  (expansion "{;keys}"           ";keys=semi,%3B,dot,.,comma,%2C")
-  (expansion "{;keys*}"          ";semi=%3B;dot=.;comma=%2C"))
+  (expansion "{;keys}"           ";keys=dot,.,semi,%3B,comma,%2C")
+  (expansion "{;keys*}"          ";dot=.;semi=%3B;comma=%2C"))
 
 (deftest form-expansion ; section 3.2.8
   (expansion "{?who}"            "?who=fred")
@@ -149,8 +149,8 @@
   (expansion "{&var:3}"         "&var=val")
   (expansion "{&list}"          "&list=red,green,blue")
   (expansion "{&list*}"         "&list=red&list=green&list=blue")
-  (expansion "{&keys}"          "&dot,.,keys=semi,%3B,comma,%2C")
-  (expansion "{&keys*}"         "&dot=.semi=%3B&&comma=%2C"))
+  (expansion "{&keys}"          "&keys=dot,.,semi,%3B,comma,%2C")
+  (expansion "{&keys*}"         "&dot=.&semi=%3B&comma=%2C"))
 
 (deftest variables-test ; section 2.3
   (is (= "bar" ((uritemplate "{%66%6F%6F}") {(keyword "%66%6F%6F") "bar"}))))

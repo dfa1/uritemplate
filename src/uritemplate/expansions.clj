@@ -100,7 +100,9 @@
      (nil? value)        nil
      (str? value)        (with-name name (urlencode (truncate value max-len)) ifemp)
      (number? value)     (with-name name (urlencode (truncate (str value) max-len)) ifemp)
-     (map? value)        (str name "=" (join sep (map #(kv kv_sep % urlencode) (seq value))))
+     (map? value)        (if explode?
+                           (join sep (map #(kv kv_sep % urlencode) (seq value)))
+                           (str name "=" (join sep (map #(kv kv_sep % urlencode) (seq value)))))
      (sequential? value) (if explode?
                            (join sep (map #(str name "=" (urlencode %)) value))
                            (str name "=" (join sep (map urlencode value))))
