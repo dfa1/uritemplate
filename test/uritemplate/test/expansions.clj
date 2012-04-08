@@ -19,12 +19,11 @@
   (is (= "foo" (render "" "foo" identity false 3))))
 
 (deftest truncate-to-test
-  (is (= nil (truncate-to nil 0)))
-  (is (= "" (truncate-to "" 0)))
-  (is (= "" (truncate-to "" 1)))
-  (is (= "val" (truncate-to "value" 3)))
-  (is (= "value" (truncate-to "value" 5)))
-  (is (= "value" (truncate-to "value" 9999))))
+  (is (= "" (truncate "" 0)))
+  (is (= "" (truncate "" 1)))
+  (is (= "val" (truncate "value" 3)))
+  (is (= "value" (truncate "value" 5)))
+  (is (= "value" (truncate "value" 9999))))
 
 (deftest simple-expansion-test
   (is (= "val" (expand {:type :simple :vars [{:name "var" :maxlen 3}]}

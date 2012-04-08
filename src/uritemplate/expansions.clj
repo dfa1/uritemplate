@@ -49,10 +49,9 @@
 (defn kv [kv_sep [key value] urlencoder]
   (str key kv_sep (urlencoder value)))
 
-(defn truncate-to [str requested-len]
-  (if (nil? str)
-    nil
-    (.substring str 0 (min requested-len (count str)))))
+(defn truncate [string len]
+  "Make sure string does not exceed len."
+  (.substring string 0 (min len (count string))))
 
 (defn str? [obj]
   (instance? java.lang.String obj))
@@ -62,8 +61,8 @@
         kv_sep (if explode? "="        ",")]
     (cond
      (nil? value)        nil
-     (str? value)        (urlencoder (truncate-to value max-len))
-     (number? value)     (urlencoder (truncate-to (str value) max-len))
+     (str? value)        (urlencoder (truncate value max-len))
+     (number? value)     (urlencoder (truncate (str value) max-len))
      (map? value)        (join sep (map #(kv kv_sep % urlencoder) (seq value)))
      (sequential? value) (join sep (map urlencoder value))
      :else (throw
