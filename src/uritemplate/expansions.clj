@@ -1,7 +1,7 @@
 (ns uritemplate.expansions)
 
 (defn char-range [from to]
-  "A declarative way to declare range of characters."
+  "A declarative way to build inclusive character ranges."
   (map char (range (int from) (inc (int to)))))
 
 (def unreserved
@@ -96,9 +96,6 @@
 ;; | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
 ;; | allow |   U     U+R     U       U       U      U      U     U+R  |
 ;; `------------------------------------------------------------------'
-;;
-;; NUL is mapped to :simple
-
 (defmulti expand :type)
 
 (defmethod expand :literal [part variables]
@@ -106,27 +103,27 @@
   (:value part))
 
 (defmethod expand :simple [part variables]
-  "Simple string expansion."
+  "Simple string expansion. See NUL in Appendix A."
   (let [sep ","]
     (join sep (remove empty? (expander sep part variables urlencode)))))
 
 (defmethod expand :reserved [part variables]
-  "Reserved expansion."
+  "Reserved expansion. See + in Appendix A."
   (let [sep ","]
     (join sep (expander sep part variables urlencode-reserved))))
 
 (defmethod expand :fragment [part variables]
-  "Fragment expansion."
+  "Fragment expansion. See # in Appendix A."
   (let [first "#" sep "," urlencoder urlencode-reserved]
     (prepend-prefix first sep (expander sep part variables urlencoder))))
 
 (defmethod expand :dot [part variables]
-  "Dot expansion."
+  "Dot expansion. See . in Appendix A."
   (let [first "." sep "." urlencoder urlencode]
     (prepend-prefix first sep (expander sep part variables urlencoder))))
 
 (defmethod expand :path [part variables]
-  "Path segment expansion."
+  "Path segment expansion. See / in Appendix A."
   (let [first "/" sep "/" urlencoder urlencode]
     (prepend-prefix first sep (expander sep part variables urlencoder))))
 
