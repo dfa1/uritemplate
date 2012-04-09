@@ -59,8 +59,7 @@
 
 (defn render-map [sep kvsep m urlencoder]
   "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
-  (let [kvs (seq m)]
-    (join sep (map #(kv kvsep % urlencoder) kvs))))
+  (join sep (map #(kv kvsep % urlencoder) (seq m))))
 
 (defn truncate [string len]
   "Make sure string does not exceed len."
