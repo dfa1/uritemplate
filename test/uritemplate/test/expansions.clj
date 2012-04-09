@@ -38,7 +38,7 @@
   (is (= "list=foo;list=bar"
          (name-render ";" "" "list" ["foo", "bar"] true 200))))
 
-(deftest truncate-to-test
+(deftest truncate-test
   (is (= "" (truncate "" 0)))
   (is (= "" (truncate "" 1)))
   (is (= "val" (truncate "value" 3)))
