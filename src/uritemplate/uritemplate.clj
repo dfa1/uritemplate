@@ -54,7 +54,7 @@
 (defn parse-token [token]
   (if (re-matches #"\{\S+\}" token)
     (parse-expression token)
-    (parse-literal token))))
+    (parse-literal token)))
 
 (defn parse [tokens]
   (flatten (map parse-token tokens)))
