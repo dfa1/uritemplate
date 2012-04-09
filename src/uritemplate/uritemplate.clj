@@ -33,20 +33,23 @@
 (defn parse-literal [token]
   {:type :literal :value token})
 
+(defn parse-type [operator]
+  ;; The operator characters equals ("="), comma (","), exclamation ("!"),
+  ;; at sign ("@"), and pipe ("|") are reserved for future extensions.
+  (case operator
+    \+     :reserved
+    \#     :fragment 
+    \.     :dot       
+    \/     :path
+    \;     :pathparam 
+    \?     :form      
+    \&     :formcont
+    :simple))
+
 (defn parse-expression [expression]
-  (let [variable-list (.substring expression 1 (dec (.length expression)))
-        operator (.charAt variable-list 0)]
-     ;; The operator characters equals ("="), comma (","), exclamation ("!"),
-     ;; at sign ("@"), and pipe ("|") are reserved for future extensions.
-    (case operator
-      \+    (parse-as :reserved  (.substring variable-list 1)) 
-      \#    (parse-as :fragment  (.substring variable-list 1))
-      \.    (parse-as :dot       (.substring variable-list 1))
-      \/    (parse-as :path      (.substring variable-list 1))
-      \;    (parse-as :pathparam (.substring variable-list 1))
-      \?    (parse-as :form      (.substring variable-list 1))
-      \&    (parse-as :formcont  (.substring variable-list 1))
-      (parse-as :simple    variable-list))))
+  (let [variable-list (.substring expression 1 (- (.length expression) 1))
+        type (parse-type (.charAt variable-list 0))]
+    (parse-as type (if (= type :simple) variable-list (.substring variable-list 1)))))
 
 (defn parse-token [token]
   (let [valid-expression #"\{\S+\}"]
