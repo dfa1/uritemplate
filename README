@@ -7,7 +7,7 @@ Generate uritemplates according to RFC 6570 (not fully compatible yet).
 - uritemplate: 
       
     (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
-      (bitbucket :user "dfa" :project "uritemplate")) ; -> http://bitbucket.org/dfa/uritemplate
+      (bitbucket {:user "dfa" :project "uritemplate"})) ; -> http://bitbucket.org/dfa/uritemplate
 
 - uriparser: TBD
      	    
