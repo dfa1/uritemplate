@@ -1,6 +1,9 @@
 (ns uritemplate.uritemplate
   (:use [uritemplate.expansions]))
 
+(defn tokenize [template]
+  (re-seq #"\{[^\{]+\}|[^{}]+" template))
+
 (defn parse-variable-prefix [variable]
   (let [[variable prefix] (.split variable ":")
         maxlen (Integer/parseInt prefix)]
@@ -8,11 +11,11 @@
     (assert (> maxlen 0))     ; sec 2.4.1
     {:name variable :maxlen maxlen}))
 
-(defn parse-variable-simple [variable]
-  {:name variable})
-
 (defn parse-variable-explode [variable]
   {:name (.substring variable 0 (dec (.length variable))) :explode true})
+
+(defn parse-variable-simple [variable]
+  {:name variable})
 
 (defn parse-variable [variable]
   (cond
@@ -45,22 +48,23 @@
       \&    (parse-as :formcont  (.substring variable-list 1))
       (parse-as :simple    variable-list))))
 
-(defn parse [token]
+(defn parse-token [token]
   (let [valid-expression #"\{\S+\}"]
     (if (re-matches valid-expression token)
       (parse-expression token)
       (parse-literal token))))
 
-(defn parser [tokens]
-  (flatten (map parse tokens)))
+(defn parse [tokens]
+  (flatten (map parse-token tokens)))
 
-(defn lexer [template]
-  (re-seq #"\{[^\{]+\}|[^{}]+" template))
+(defn compile-template [template]
+  (parse (tokenize template)))
 
-(defn expand-all [parts variables]
-  (apply str (map #(expand % variables) parts)))
+(defn expand-template [compiled-template variables]
+  (apply str (map #(expand % variables) compiled-template)))
 
 (defn uritemplate [template]
-  (let [parts (parser (lexer template))]
-    (fn [variables] (expand-all parts variables))))
+  (let [compiled-template (compile-template template)]
+    (fn [variables]
+      (expand-template compiled-template variables))))
 

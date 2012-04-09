@@ -76,7 +76,7 @@
 
 (defn render [wanted_sep value urlencoder explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
-        kvsep (if explode? "="        ",")]
+        kvsep  (if explode? "="        ",")]
     (cond
      (nil? value)        nil
      (str? value)        (urlencoder (truncate value max-len))
