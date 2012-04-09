@@ -74,6 +74,7 @@
    (UnsupportedOperationException.
     (format  "unsupported type '%s'" (class value)))))
 
+;; FIXME: too many parameters
 (defn render [wanted_sep value urlencoder explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
         kvsep  (if explode? "="        ",")]
@@ -98,6 +99,7 @@
     (str name ifemp)
     (str name "=" value)))
 
+;; FIXME: too many parameters
 (defn name-render [wanted_sep ifemp name value explode? max-len]
   (let [sep    (if explode? wanted_sep ",")
         kvsep  (if explode? "="        ",")]
@@ -181,4 +183,3 @@
   "Form continuation expansion. See & in Appendix A."
   (let [first "&" sep "&" ifemp "="]
     (join-with-prefix first sep (name-expander sep ifemp part variables))))
-
