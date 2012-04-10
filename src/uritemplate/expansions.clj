@@ -101,7 +101,7 @@
         kvsep  (if explode? "="        ",")]
     (cond
      (nil? value)        nil
-     (str? value)        (with-name name (urlencode (truncate value max-len)) ifemp)
+     (string? value)        (with-name name (urlencode (truncate value max-len)) ifemp)
      (number? value)     (with-name name (urlencode (truncate (str value) max-len)) ifemp)
      (map? value)        (if explode?
                            (render-map sep kvsep value urlencode)
