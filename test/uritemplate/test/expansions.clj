@@ -2,6 +2,11 @@
   (:use [uritemplate.expansions])
   (:use [clojure.test]))
 
+(deftest char-range
+  (is (= [] (char-range \z \a)))
+  (is (= [\a] (char-range \a \a)))
+  (is (= [\a \b] (char-range \a \b))))
+
 (deftest join-test
   (is (= "" (join "," [])))
   (is (= "a" (join "," ["a"])))
