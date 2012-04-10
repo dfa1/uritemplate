@@ -2,7 +2,7 @@
   (:use [uritemplate.expansions])
   (:use [clojure.test]))
 
-(deftest char-range
+(deftest char-range-test
   (is (= [] (char-range \z \a)))
   (is (= [\a] (char-range \a \a)))
   (is (= [\a \b] (char-range \a \b))))
