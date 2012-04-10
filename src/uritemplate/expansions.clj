@@ -65,9 +65,6 @@
   "Make sure string does not exceed len."
   (.substring string 0 (min len (count string))))
 
-(defn str? [obj]
-  (instance? java.lang.String obj))
-
 (defn unsupported-value [value]
   (throw
    (UnsupportedOperationException.
@@ -79,7 +76,7 @@
         kvsep  (if explode? "="        ",")]
     (cond
      (nil? value)        nil
-     (str? value)        (urlencoder (truncate value max-len))
+     (string? value)        (urlencoder (truncate value max-len))
      (number? value)     (urlencoder (truncate (str value) max-len))
      (map? value)        (render-map sep kvsep value urlencoder)
      (sequential? value) (join sep (map urlencoder value))
