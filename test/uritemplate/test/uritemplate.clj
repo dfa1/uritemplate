@@ -2,6 +2,16 @@
   (:use [uritemplate.uritemplate])
   (:use [clojure.test]))
 
+(deftest split-by-test
+  (let [comma? (ch \,)]
+  (is (= [] (split-by comma? (seq ""))))
+  (is (= [] (split-by comma? (seq ","))))
+  (is (= [[\a]] (split-by comma? (seq "a"))))
+  (is (= [[\a]] (split-by comma? (seq "a,"))))
+  (is (= [[\a]] (split-by comma? (seq ",a"))))
+  (is (= [[\a] [\b]] (split-by comma? (seq "a,b"))))
+  (is (= [[\a] [\b]] (split-by comma? (seq "a,,b"))))))
+
 (deftest tokenize-test
   (is (= nil (tokenize "")))
   (is (= ["www.example.com"] (tokenize "www.example.com")))
@@ -11,8 +21,8 @@
   (is (= ["{/path}"] (tokenize "{/path}"))))
 
 (deftest variables-test
-  (is (= {:explode true :name "foo"} (parse-variable "foo*")))
-  (is (= {:name "foo" :maxlen 123} (parse-variable "foo:123")))
+  (is (= {:explode true :name "foo"} (parse-variable (seq "foo*"))))
+  (is (= {:name "foo" :maxlen 123} (parse-variable (seq "foo:123"))))
   (is (thrown? AssertionError (parse-variable "foo:10000")))
   (is (thrown? AssertionError (parse-variable "foo:0")))
   (is (= [{:name "foo"}] (parse-variable-list "foo")))

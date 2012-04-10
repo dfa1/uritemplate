@@ -1,37 +1,44 @@
 (ns uritemplate.uritemplate
   (:use [uritemplate.expansions]))
 
+(defn ch [wanted]
+  (fn [candidate]
+    (= wanted candidate)))
+
+(defn split-by [pred coll]
+  (remove #(every? pred %) (partition-by pred coll)))
+
 (defn tokenize [template]
-  (re-seq #"\{[^\{]+\}|[^{}]+" template))
+  (re-seq #"\{[^\{]+\}|[^{}]+" template)) ;; FIXME: try to avoid re-seq here
 
 (defn parse-variable-prefix [variable]
-  (let [[variable prefix] (.split variable ":")
-        maxlen (Integer/parseInt prefix)]
+  (let [[variable prefix] (split-by (ch \:) variable)
+        maxlen (Integer/parseInt (apply str prefix))]
     (assert (< maxlen 10000)) ; sec 2.4.1
     (assert (> maxlen 0))     ; sec 2.4.1
-    {:name variable :maxlen maxlen}))
+    {:name (apply str variable) :maxlen maxlen}))
 
 (defn parse-variable-explode [variable]
-  {:name (.substring variable 0 (dec (.length variable))) :explode true})
+  {:name (apply str (butlast variable)) :explode true})
 
 (defn parse-variable-simple [variable]
-  {:name variable})
+  {:name (apply str variable)})
 
 (defn parse-variable [variable]
   (cond
-   (.contains variable "*") (parse-variable-explode variable)
-   (.contains variable ":") (parse-variable-prefix variable)
+   (= \* (last variable))    (parse-variable-explode variable)
+   (some (ch \:) variable)   (parse-variable-prefix variable)
    :else (parse-variable-simple variable)))
 
 (defn parse-variable-list [variables]
-  (map parse-variable (re-seq #"[^,]+" variables)))
+  (map parse-variable (split-by (ch \,) variables)))
 
 (defn parse-as [type variable-list]
   (let [variables (parse-variable-list variable-list)]
     {:type type :vars (vec variables)}))
 
-(defn parse-literal [token]
-  {:type :literal :value token})
+(defn parse-literal [literal]
+  {:type :literal :value (apply str literal)})
 
 (def operators->type { 
    \+     :reserved
@@ -45,16 +52,16 @@
 
 (defn parse-type [operator]
   (operators->type operator :simple))
-  
+
 (defn parse-expression [expression]
-  (let [variable-list (.substring expression 1 (- (.length expression) 1))
-        type (parse-type (.charAt variable-list 0))]
-    (parse-as type (if (= type :simple) variable-list (.substring variable-list 1)))))
+  (let [variable-list (rest (butlast expression))
+        type          (parse-type (first variable-list))]
+    (parse-as type (if (= type :simple) variable-list (rest variable-list)))))
 
 (defn parse-token [token]
-  (if (re-matches #"\{\S+\}" token)
-    (parse-expression token)
-    (parse-literal token)))
+  (if (re-matches #"\{\S+\}" token) ;; FIXME: try to avoid re-matches here
+    (parse-expression (seq token))
+    (parse-literal (seq token))))
 
 (defn parse [tokens]
   (flatten (map parse-token tokens)))
@@ -69,4 +76,3 @@
   (let [compiled-template (compile-template template)]
     (fn [variables]
       (expand-template compiled-template variables))))
-
