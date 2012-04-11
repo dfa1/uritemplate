@@ -5,6 +5,10 @@
   (fn [candidate]
     (= wanted candidate)))
 
+(def comma? (ch \,))
+(def star?  (ch \*))
+(def colon? (ch \:))
+
 (defn split-by [pred coll]
   (remove #(every? pred %) (partition-by pred coll)))
 
@@ -12,7 +16,7 @@
   (re-seq #"\{[^\{]+\}|[^{}]+" template)) ;; FIXME: try to avoid re-seq here
 
 (defn parse-variable-prefix [variable]
-  (let [[variable prefix] (split-by (ch \:) variable)
+  (let [[variable prefix] (split-by colon? variable)
         maxlen (Integer/parseInt (apply str prefix))]
     (assert (< maxlen 10000)) ; sec 2.4.1
     (assert (> maxlen 0))     ; sec 2.4.1
@@ -26,12 +30,12 @@
 
 (defn parse-variable [variable]
   (cond
-   (= \* (last variable))    (parse-variable-explode variable)
-   (some (ch \:) variable)   (parse-variable-prefix variable)
+   (star? (last variable))    (parse-variable-explode variable)
+   (some colon? variable)   (parse-variable-prefix variable)
    :else (parse-variable-simple variable)))
 
 (defn parse-variable-list [variables]
-  (map parse-variable (split-by (ch \,) variables)))
+  (map parse-variable (split-by comma? variables)))
 
 (defn parse-as [type variable-list]
   (let [variables (parse-variable-list variable-list)]
