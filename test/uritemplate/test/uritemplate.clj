@@ -25,11 +25,11 @@
   (is (= {:type :simple :vars []} (parse-token "{}")))
   (is (= {:type :simple :vars [{:name "foo"}]} (parse-token "{foo}"))))
 
-(deftest variables-test
-  (is (= {:explode true :name "foo"} (parse-variable (seq "foo*"))))
-  (is (= {:name "foo" :maxlen 123} (parse-variable (seq "foo:123"))))
-  (is (thrown? AssertionError (parse-variable "foo:10000")))
-  (is (thrown? AssertionError (parse-variable "foo:0")))
+(deftest parse-varspec-test
+  (is (= {:explode true :name "foo"} (parse-varspec (seq "foo*"))))
+  (is (= {:name "foo" :maxlen 123} (parse-varspec (seq "foo:123"))))
+  (is (thrown? AssertionError (parse-varspec "foo:10000")))
+  (is (thrown? AssertionError (parse-varspec "foo:0")))
   (is (= [{:name "foo"}] (parse-variable-list "foo")))
   (is (= [{:name "foo"} {:name "bar"}] (parse-variable-list "foo,,bar")))
   (is (= [{:name "foo"} {:name "bar"}] (parse-variable-list "foo,bar"))))

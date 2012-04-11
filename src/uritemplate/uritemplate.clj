@@ -15,27 +15,33 @@
 (defn tokenize [template]
   (re-seq #"\{[^\{]+\}|[^{}]+" template)) ;; FIXME: try to avoid re-seq here
 
-(defn parse-variable-prefix [variable]
-  (let [[variable prefix] (split-by colon? variable)
+(defn parse-varspec-prefix [varspec]
+  (let [[varname prefix] (split-by colon? varspec)
         maxlen (Integer/parseInt (apply str prefix))]
     (assert (< maxlen 10000)) ; sec 2.4.1
     (assert (> maxlen 0))     ; sec 2.4.1
-    {:name (apply str variable) :maxlen maxlen}))
+    {:name (apply str varname) :maxlen maxlen}))
 
-(defn parse-variable-explode [variable]
-  {:name (apply str (butlast variable)) :explode true})
+(defn parse-varspec-explode [varspec]
+  (let [varname (butlast varspec)]
+    {:name (apply str varname) :explode true}))
 
-(defn parse-variable-simple [variable]
-  {:name (apply str variable)})
+(defn parse-varspec-simple [varname]
+  {:name (apply str varname)})
 
-(defn parse-variable [variable]
+(defn parse-varspec [varspec]
   (cond
-   (star? (last variable))    (parse-variable-explode variable)
-   (some colon? variable)   (parse-variable-prefix variable)
-   :else (parse-variable-simple variable)))
+   (star? (last varspec)) (parse-varspec-explode varspec)
+   (some colon? varspec)  (parse-varspec-prefix  varspec)
+   :else                  (parse-varspec-simple  varspec)))
 
-(defn parse-variable-list [variables]
-  (map parse-variable (split-by comma? variables)))
+;; sec 2.3 
+;; variable-list =  varspec *( "," varspec )
+;; varspec       =  varname [ modifier-level4 ]
+;; varname       =  varchar *( ["."] varchar )
+;; varchar       =  ALPHA / DIGIT / "_" / pct-encoded
+(defn parse-variable-list [variable-list]
+  (map parse-varspec (split-by comma? variable-list)))
 
 (defn parse-as [type variable-list]
   (let [variables (parse-variable-list variable-list)]
