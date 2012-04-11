@@ -34,6 +34,13 @@
   (is (= [{:name "foo"} {:name "bar"}] (parse-variable-list "foo,,bar")))
   (is (= [{:name "foo"} {:name "bar"}] (parse-variable-list "foo,bar"))))
 
+(deftest parse-varname-test
+  (is (thrown? AssertionError (parse-varname "va$")))
+  (is (= "foo" (parse-varname (seq "foo"))))
+  (is (= "foo.bar" (parse-varname (seq "foo.bar"))))
+  (is (= "foo_bar" (parse-varname (seq "foo_bar"))))
+  (is (= "foo123" (parse-varname (seq "foo123")))))
+
 (deftest literal-test
   (is (= {:type :literal :value "http://example.com"}
          (parse-token "http://example.com"))))

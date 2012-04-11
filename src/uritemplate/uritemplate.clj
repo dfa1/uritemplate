@@ -15,12 +15,29 @@
 (defn tokenize [template]
   (re-seq #"\{[^\{]+\}|[^{}]+" template)) ;; FIXME: try to avoid re-seq here
 
-(defn parse-varspec-prefix [varspec]
-  (let [[varname prefix] (split-by colon? varspec)
-        maxlen (Integer/parseInt (apply str prefix))]
+;; sec 2.3, FIXME: can accept invalid pct-encoded
+(def varchar? (set (concat
+                    (char-range \A \Z)
+                    (char-range \a \z)
+                    (char-range \0 \9)
+                    [\_ \% \.])))
+
+
+(defn parse-prefix [prefix]
+  (let [maxlen (Integer/parseInt (apply str prefix))]
     (assert (< maxlen 10000)) ; sec 2.4.1
     (assert (> maxlen 0))     ; sec 2.4.1
-    {:name (apply str varname) :maxlen maxlen}))
+    maxlen))
+
+(defn parse-varname [varname]
+  (do
+    (assert (every? varchar? varname))
+    (apply str varname)))
+
+(defn parse-varspec-prefix [varspec]
+  (let [[varname prefix] (split-by colon? varspec)]
+    {:name (parse-varname varname)
+     :maxlen (parse-prefix prefix)}))
 
 (defn parse-varspec-explode [varspec]
   (let [varname (butlast varspec)]
