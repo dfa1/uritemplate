@@ -59,9 +59,10 @@
     (parse-as type (if (= type :simple) variable-list (rest variable-list)))))
 
 (defn parse-token [token]
-  (if (re-matches #"\{\S+\}" token) ;; FIXME: try to avoid re-matches here
-    (parse-expression (seq token))
-    (parse-literal (seq token))))
+  (let [t (seq token)]
+    (if (and (= \{ (first t)) (= \} (last t)))
+      (parse-expression t)
+      (parse-literal t))))
 
 (defn parse [tokens]
   (flatten (map parse-token tokens)))

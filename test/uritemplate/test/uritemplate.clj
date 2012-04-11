@@ -20,6 +20,11 @@
   (is (= ["up" "{+path}" "{var}" "/here"] (tokenize "up{+path}{var}/here")))
   (is (= ["{/path}"] (tokenize "{/path}"))))
 
+(deftest parse-token-test
+  (is (= {:type :literal :value "foo"} (parse-token "foo")))
+  (is (= {:type :simple :vars []} (parse-token "{}")))
+  (is (= {:type :simple :vars [{:name "foo"}]} (parse-token "{foo}"))))
+
 (deftest variables-test
   (is (= {:explode true :name "foo"} (parse-variable (seq "foo*"))))
   (is (= {:name "foo" :maxlen 123} (parse-variable (seq "foo:123"))))
@@ -40,5 +45,3 @@
 (deftest reserved-expression-test
   (is (= {:type :reserved :vars [{:name "foo"} {:name "bar"}]} (parse-token "{+foo,bar}"))))
 
-(deftest expression-test
-  (is (= {:type :literal :value "{}"} (parse-token "{}"))))
