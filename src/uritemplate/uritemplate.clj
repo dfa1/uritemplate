@@ -65,15 +65,15 @@
       (parse-literal t))))
 
 (defn parse [tokens]
-  (flatten (map parse-token tokens)))
+  (map parse-token tokens))
 
 (defn compile-template [template]
-  (parse (tokenize template)))
+  (flatten (parse (tokenize template))))
 
 (defn expand-template [compiled-template variables]
-  (apply str (map #(expand % variables) compiled-template)))
+  (map #(expand % variables) compiled-template))
 
 (defn uritemplate [template]
   (let [compiled-template (compile-template template)]
     (fn [variables]
-      (expand-template compiled-template variables))))
+      (apply str (expand-template compiled-template variables)))))
