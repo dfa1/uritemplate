@@ -52,3 +52,7 @@
 (deftest reserved-expression-test
   (is (= {:type :reserved :vars [{:name "foo"} {:name "bar"}]} (parse-token "{+foo,bar}"))))
 
+(deftest readme-example
+  (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
+    (is (= "http://bitbucket.org/dfa/uritemplate"
+           (bitbucket {:user "dfa" :project "uritemplate"})))))

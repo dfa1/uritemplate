@@ -1,161 +1,27 @@
 (ns uritemplate.test.acceptance
   (:use [uritemplate.uritemplate])
-  (:use [clojure.test]))
+  (:use [clojure.test])
+  (:use [clojure.data.json]))
 
-;; variables defined in section 3.2
-(def example-variables
-  {
-   :dom        "example.com"
-   :dub        "me/too"
-   :foo        "That’s right!"
-   :hello      "Hello World!"
-   :half       "50%"
-   :var        "value"
-   :who        "fred"
-   :base       "http://example.com/home/"
-   :path       "/foo/bar"
-   :list       [ "red" "green" "blue" ]
-   :keys       { "semi" ";" "dot" "." "comma" "," }
-   :v          "6"
-   :x          "1024"
-   :y          "768"
-   :empty      ""
-   :empty_keys []
-   :undef      nil
-   })
+(defn- run-testcase [level variables testcase]
+  (let [template (first testcase)
+        expected (second testcase)
+        compiled-template (uritemplate template)
+        got (compiled-template variables)]
+    (println (format "testing template '%s' is '%s'" template expected)) 
+    (is (= expected got)
+        (format "template level %s: '%s', expected: '%s', got '%s'" level template expected got))))
 
-(defmacro expansion [template expected]
-  `(let [compiled-template# (uritemplate ~template)
-        got# (compiled-template# example-variables)]
-     (is (= ~expected got#) (format "template: \"%s\"" ~template))))
+(defn- run-testcases-by-level [data]
+  (let [variables (:variables data)]
+    (doall
+     (map #(run-testcase (:level data) variables %) (:testcases data)))))
 
-(deftest simple-string-expansion ; section 3.2.2
-  (expansion "{var}"       "value")
-  (expansion "{hello}"     "Hello%20World%21")
-  (expansion "{half}"      "50%25")
-  (expansion "O{empty}X"   "OX")
-  (expansion "O{undef}X"   "OX")
-  (expansion "{x,y}"       "1024,768")
-  (expansion "{x,hello,y}" "1024,Hello%20World%21,768")
-  (expansion "?{x,empty}"  "?1024")
-  (expansion "?{x,undef}"  "?1024")
-  (expansion "?{undef,y}"  "?768")
-  (expansion "{var:3}"     "val")
-  (expansion "{var:30}"    "value")
-  (expansion "{list}"      "red,green,blue")
-  (expansion "{list*}"     "red,green,blue")
-  (expansion "{keys}"      "dot,.,semi,%3B,comma,%2C")
-  (expansion "{keys*}"     "dot=.,semi=%3B,comma=%2C"))
+(defn- load-specs []
+  (clojure.java.io/reader
+   (clojure.java.io/resource "uritemplate/test/specs.json")))
 
-(deftest reserved-expansion ; section 3.2.3
-  (expansion "{+var}"              "value")
-  (expansion "{+hello}"            "Hello%20World!")
-  (expansion "{+half}"             "50%25")
-  (expansion "{base}index"         "http%3A%2F%2Fexample.com%2Fhome%2Findex")
-  (expansion "{+base}index"        "http://example.com/home/index")
-  (expansion "O{+empty}X"          "OX")
-  (expansion "O{+undef}X"          "OX")
-  (expansion "{+path}/here"        "/foo/bar/here")
-  (expansion "here?ref={+path}"    "here?ref=/foo/bar")
-  (expansion "up{+path}{var}/here" "up/foo/barvalue/here")
-  (expansion "{+x,hello,y}"        "1024,Hello%20World!,768")
-  (expansion "{+path,x}/here"      "/foo/bar,1024/here")
-  (expansion "{+path:6}/here"      "/foo/b/here")
-  (expansion "{+list}"             "red,green,blue")
-  (expansion "{+list*}"            "red,green,blue")
-  (expansion "{+keys}"             "dot,.,semi,;,comma,,")
-  (expansion "{+keys*}"            "dot=.,semi=;,comma=,"))
-
-(deftest fragment-expansion ; section 3.2.4
-  (expansion "{#var}"             "#value")
-  (expansion "{#hello}"           "#Hello%20World!")
-  (expansion "{#half}"            "#50%25")
-  (expansion "foo{#empty}"        "foo#")
-  (expansion "foo{#undef}"        "foo")
-  (expansion "{#x,hello,y}"       "#1024,Hello%20World!,768")
-  (expansion "{#path,x}/here"     "#/foo/bar,1024/here")
-  (expansion "{#path:6}/here"     "#/foo/b/here")
-  (expansion "{#list}"            "#red,green,blue")
-  (expansion "{#list*}"           "#red,green,blue")
-  (expansion "{#keys}"            "#dot,.,semi,;,comma,,")
-  (expansion "{#keys*}"           "#dot=.,semi=;,comma=,"))
-
-(deftest dot-expansion ; section 3.2.5
-  (expansion "{.who}"          ".fred")
-  (expansion "{.who,who}"      ".fred.fred")
-  (expansion "{.half,who}"     ".50%25.fred")
-  (expansion "www{.dom*}"      "www.example.com")
-  (expansion "X{.var}"         "X.value")
-  (expansion "X{.empty}"       "X.")
-  (expansion "X{.undef}"       "X")
-  (expansion "X{.var:3}"       "X.val")
-  (expansion "X{.list}"        "X.red,green,blue")
-  (expansion "X{.list*}"       "X.red.green.blue")
-  (expansion "X{.keys}"        "X.dot,.,semi,%3B,comma,%2C")
-  (expansion "X{.keys*}"       "X.dot=..semi=%3B.comma=%2C"))
-;; FIXME: variable empty_keys is not defined in RFC 
-;(expansion "X{.empty_keys}"  "X")
-;(expansion "X{.empty_keys*}" "X")
-
-(deftest path-segment-expansion ; section 3.2.6
-  (expansion "{/who}"          "/fred")
-  (expansion "{/who,who}"      "/fred/fred")
-  (expansion "{/half,who}"     "/50%25/fred")
-  (expansion "{/who,dub}"      "/fred/me%2Ftoo")
-  (expansion "{/var}"          "/value")
-  (expansion "{/var,empty}"    "/value/")
-  (expansion "{/var,undef}"    "/value")
-  (expansion "{/var,x}/here"   "/value/1024/here")
-  (expansion "{/var:1,var}"    "/v/value")
-  (expansion "{/list}"         "/red,green,blue")
-  (expansion "{/list*}"        "/red/green/blue")
-  (expansion "{/list*,path:4}" "/red/green/blue/%2Ffoo")
-  (expansion "{/keys}"         "/dot,.,semi,%3B,comma,%2C")
-  (expansion "{/keys*}"        "/dot=./semi=%3B/comma=%2C"))
-
-(deftest path-param-expansion ; section 3.2.7
-  (expansion "{;who}"            ";who=fred")
-  (expansion "{;half}"           ";half=50%25")
-  (expansion "{;empty}"          ";empty")
-  (expansion "{;v,empty,who}"    ";v=6;empty;who=fred")
-  (expansion "{;v,bar,who}"      ";v=6;who=fred")
-  (expansion "{;x,y}"            ";x=1024;y=768")
-  (expansion "{;x,y,empty}"      ";x=1024;y=768;empty")
-  (expansion "{;x,y,undef}"      ";x=1024;y=768")
-  (expansion "{;hello:5}"        ";hello=Hello")
-  (expansion "{;list}"           ";list=red,green,blue")
-  (expansion "{;list*}"          ";list=red;list=green;list=blue")
-  (expansion "{;keys}"           ";keys=dot,.,semi,%3B,comma,%2C")
-  (expansion "{;keys*}"          ";dot=.;semi=%3B;comma=%2C"))
-
-(deftest form-expansion ; section 3.2.8
-  (expansion "{?who}"            "?who=fred")
-  (expansion "{?half}"           "?half=50%25")
-  (expansion "{?x,y}"            "?x=1024&y=768")
-  (expansion "{?x,y,empty}"      "?x=1024&y=768&empty=")
-  (expansion "{?x,y,undef}"      "?x=1024&y=768")
-  (expansion "{?var:3}"          "?var=val")
-  (expansion "{?list}"           "?list=red,green,blue")
-  (expansion "{?list*}"          "?list=red&list=green&list=blue")
-  (expansion "{?keys}"           "?keys=dot,.,semi,%3B,comma,%2C")
-  (expansion "{?keys*}"          "?dot=.&semi=%3B&comma=%2C")) 
-
-(deftest form-continuation ; section 3.2.9
-  (expansion "{&who}"           "&who=fred")
-  (expansion "{&half}"          "&half=50%25")
-  (expansion "?fixed=yes{&x}"   "?fixed=yes&x=1024")
-  (expansion "{&x,y,empty}"     "&x=1024&y=768&empty=")
-  (expansion "{&x,y,undef}"     "&x=1024&y=768")
-  (expansion "{&var:3}"         "&var=val")
-  (expansion "{&list}"          "&list=red,green,blue")
-  (expansion "{&list*}"         "&list=red&list=green&list=blue")
-  (expansion "{&keys}"          "&keys=dot,.,semi,%3B,comma,%2C")
-  (expansion "{&keys*}"         "&dot=.&semi=%3B&comma=%2C"))
-
-(deftest variables-test ; section 2.3
-  (is (= "bar" ((uritemplate "{%66%6F%6F}") {(keyword "%66%6F%6F") "bar"}))))
-  
-(deftest readme-example
-  (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
-    (is (= "http://bitbucket.org/dfa/uritemplate"
-           (bitbucket {:user "dfa" :project "uritemplate"})))))
+(deftest rfc-specs
+  (doall
+   (map run-testcases-by-level
+        (vals (read-json (load-specs))))))

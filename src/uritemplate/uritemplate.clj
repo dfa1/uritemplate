@@ -22,7 +22,6 @@
                     (char-range \0 \9)
                     [\_ \% \.])))
 
-
 (defn parse-prefix [prefix]
   (let [maxlen (Integer/parseInt (apply str prefix))]
     (assert (< maxlen 10000)) ; sec 2.4.1

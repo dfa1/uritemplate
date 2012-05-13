@@ -54,12 +54,17 @@
       ""
       (str prefix (join sep filtered-coll)))))
 
+(defn keyword-aware-str [value]
+  (if (keyword? value)
+    (apply str (rest (str value)))
+    (str value)))
+
 (defn kv [kvsep [key value] urlencoder]
-  (str key kvsep (urlencoder value)))
+  (str (keyword-aware-str key) kvsep (urlencoder value)))
 
 (defn render-map [sep kvsep m urlencoder]
   "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
-  (join sep (map #(kv kvsep % urlencoder) (seq m))))
+  (join sep (map #(kv kvsep % urlencoder) (seq (sort m)))))
 
 (defn truncate [string len]
   "Make sure string does not exceed len."
@@ -76,7 +81,7 @@
         kvsep  (if explode? "="        ",")]
     (cond
      (nil? value)        nil
-     (string? value)        (urlencoder (truncate value max-len))
+     (string? value)     (urlencoder (truncate value max-len))
      (number? value)     (urlencoder (truncate (str value) max-len))
      (map? value)        (render-map sep kvsep value urlencoder)
      (sequential? value) (join sep (map urlencoder value))

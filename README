@@ -1,6 +1,6 @@
 # uritemplate
 
-Generate uritemplates according to RFC 6570 (not fully compatible yet). 
+Creates uritemplates according to RFC 6570. 
 
 ## Usage
 
@@ -13,9 +13,8 @@ Generate uritemplates according to RFC 6570 (not fully compatible yet).
      	    
 ## Todo
 
-
 - simplify expansions.clj
-- error handling:
+- improve error reporting:
    + missing } in templates
    + empty templates
    + prefix together with explode
