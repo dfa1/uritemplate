@@ -66,8 +66,8 @@
 (defn parse-literal [literal]
   {:type :literal :value (apply str literal)})
 
-(def operators->type { 
-   \+     :reserved
+(def operator->type { 
+   \+     :reserved 
    \#     :fragment 
    \.     :dot       
    \/     :path
@@ -76,13 +76,21 @@
    \&     :formcont
    })
 
-(defn parse-type [operator]
-  (operators->type operator :simple))
+(defn parse-type [variable-list]
+  "Yields a pair of operator type and variable-list. Maybe consume the
+operator character."
+  (let [type (operator->type (first variable-list))]
+    (if type
+      [type    (rest variable-list)]
+      [:simple variable-list])))
+      
+(defn- drop-braces [expression]
+  "{foo,bar:1} -> foo,bar:1"
+  (rest (butlast expression)))
 
 (defn parse-expression [expression]
-  (let [variable-list (rest (butlast expression))
-        type          (parse-type (first variable-list))]
-    (parse-as type (if (= type :simple) variable-list (rest variable-list)))))
+  (let [[type variable-list] (parse-type (drop-braces expression))]
+    (parse-as type variable-list)))
 
 (defn parse-token [token]
   (let [t (seq token)]
