@@ -58,8 +58,8 @@
   (str (name key) kvsep (encoder value)))
 
 ;; FIXME: sorting keys in map in order to have a predicible iteration order 
-(defn render-map [sep kvsep m encoder]
-  "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
+(defn expand-map [sep kvsep m encoder]
+  "(str k1 kvsep (encoder v1) sep k2 kvsep (encoder v2) sep ...)"
   (join sep (map #(kv kvsep % encoder) (seq (sort m)))))
 
 (defn truncate-to [max-len]
@@ -87,17 +87,20 @@
         encode      (:allow cfg)]
   (cond
    (nil? value)        nil
-   (string? value)     (if named?
-                         (with-name name (encode (truncate value)) ifemp)
-                         (encode (truncate value)))
-   (number? value)     (if named?
-                         (with-name name (encode (truncate (str value))) ifemp)
-                         (encode (truncate (str value))))
-   (map? value)       (if named?  
-                        (if explode?
-                          (render-map sep kvsep value encode)
-                          (str name "=" (render-map sep kvsep value encode)))
-                        (render-map sep kvsep value encode))
+   (string? value)     (let [expanded (encode (truncate value))]
+                         (if named?
+                           (with-name name expanded ifemp)
+                           expanded))
+   (number? value)     (let [expanded (encode (truncate (str value)))]
+                         (if named?
+                           (with-name name expanded ifemp)
+                           expanded))
+   (map? value)        (let [expanded (expand-map sep kvsep value encode)]
+                         (if named?  
+                           (if explode?
+                             expanded
+                             (str name "=" expanded))
+                           expanded))
    (sequential? value) (if named?
                          (if explode?
                            (join sep (map #(str name "=" (encode %)) value))
@@ -124,17 +127,17 @@
 (def U urlencode)
 (def U+R urlencode-reserved)
 (def expanders
-  {
-   :literal  { :first ""  :sep ""  :named false :ifemp ""  :allow N   }
-   :simple   { :first ""  :sep "," :named false :ifemp ""  :allow U   }
-   :reserved { :first ""  :sep "," :named false :ifemp ""  :allow U+R }
-   :fragment { :first "#" :sep "," :named false :ifemp ""  :allow U+R }
-   :dot      { :first "." :sep "." :named false :ifemp ""  :allow U   }
-   :path     { :first "/" :sep "/" :named false :ifemp ""  :allow U   }
-   :param    { :first ";" :sep ";" :named true  :ifemp ""  :allow U   }
-   :form     { :first "?" :sep "&" :named true  :ifemp "=" :allow U   }
-   :formcont { :first "&" :sep "&" :named true  :ifemp "=" :allow U   }
-   })
+   {
+    :literal  { :first ""  :sep ""  :named false :ifemp ""  :allow N   }
+    :simple   { :first ""  :sep "," :named false :ifemp ""  :allow U   }
+    :reserved { :first ""  :sep "," :named false :ifemp ""  :allow U+R }
+    :fragment { :first "#" :sep "," :named false :ifemp ""  :allow U+R }
+    :dot      { :first "." :sep "." :named false :ifemp ""  :allow U   }
+    :path     { :first "/" :sep "/" :named false :ifemp ""  :allow U   }
+    :param    { :first ";" :sep ";" :named true  :ifemp ""  :allow U   }
+    :form     { :first "?" :sep "&" :named true  :ifemp "=" :allow U   }
+    :formcont { :first "&" :sep "&" :named true  :ifemp "=" :allow U   }
+    })
 
 (defn expand [part variables]
   (let [cfg ((:type part) expanders)]
