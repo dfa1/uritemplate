@@ -34,11 +34,12 @@
   (is (= "hello%20world!" (urlencode-reserved "hello world!"))))
 
 (deftest truncate-test
-  (is (= "" (truncate "" 0)))
-  (is (= "" (truncate "" 1)))
-  (is (= "val" (truncate "value" 3)))
-  (is (= "value" (truncate "value" 5)))
-  (is (= "value" (truncate "value" 9999))))
+  (is (= "" ((truncate-to -1) "")))
+  (is (= "" ((truncate-to 0) "")))
+  (is (= "" ((truncate-to 1) "")))
+  (is (= "val" ((truncate-to 3) "value")))
+  (is (= "value" ((truncate-to 5) "value")))
+  (is (= "value" ((truncate-to 9999) "value"))))
 
 (deftest simple-expansion-test
   (is (= "val"

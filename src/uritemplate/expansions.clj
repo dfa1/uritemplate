@@ -62,9 +62,12 @@
   "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
   (join sep (map #(kv kvsep % encoder) (seq (sort m)))))
 
-(defn truncate [string len]
-  "Make sure string does not exceed len."
-  (.substring string 0 (min len (count string))))
+(defn truncate-to [max-len]
+  "Return a function that truncates strings to the specified max-len."
+  (fn [string]
+    (let [stream (seq string)
+          len (min max-len (count stream))]
+      (apply str (take len stream)))))
 
 (defn with-name [name value ifemp]
   (if (empty? value)
@@ -73,23 +76,23 @@
 
 (defn expand-variable [variable cfg]
   "I'm big and bad."
-  (let [value    (:value variable)
-        max-len  (:maxlen variable 9999)
-        name     (:name variable)
-        ifemp    (:ifemp cfg)
-        explode? (:explode variable)
-        named?   (:named cfg)
-        sep      (if explode? (:sep cfg) ",")
-        kvsep    (if explode? "="        ",")
-        encode  (:allow cfg)]
+  (let [value       (:value variable)
+        truncate    (truncate-to (:maxlen variable 9999))
+        name        (:name variable)
+        ifemp       (:ifemp cfg)
+        explode?    (:explode variable)
+        named?      (:named cfg)
+        sep         (if explode? (:sep cfg) ",")
+        kvsep       (if explode? "="        ",")
+        encode      (:allow cfg)]
   (cond
    (nil? value)        nil
    (string? value)     (if named?
-                         (with-name name (encode (truncate value max-len)) ifemp)
-                         (encode (truncate value max-len)))
+                         (with-name name (encode (truncate value)) ifemp)
+                         (encode (truncate value)))
    (number? value)     (if named?
-                         (with-name name (encode (truncate (str value) max-len)) ifemp)
-                         (encode (truncate (str value) max-len)))
+                         (with-name name (encode (truncate (str value))) ifemp)
+                         (encode (truncate (str value))))
    (map? value)       (if named?  
                         (if explode?
                           (render-map sep kvsep value encode)
