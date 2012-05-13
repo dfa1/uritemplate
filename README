@@ -9,17 +9,14 @@ Creates uritemplates according to RFC 6570.
     (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
       (bitbucket {:user "dfa" :project "uritemplate"})) ; -> http://bitbucket.org/dfa/uritemplate
 
-- uriparser: TBD
      	    
 ## Todo
 
-- simplify expansions.clj
 - improve error reporting:
    + missing } in templates
    + empty templates
    + prefix together with explode
-   + other corner cases 
-- uriparser
+- uriparser?
     (let [example-parser (uri-parser "http://example.com/{role}/{user}")]
       (example-parser "http://example.com/admin/dfa")) ; yields {:role "admin"
       	  :user "user" }
