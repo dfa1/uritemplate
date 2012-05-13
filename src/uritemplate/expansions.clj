@@ -66,17 +66,13 @@
   "Make sure string does not exceed len."
   (.substring string 0 (min len (count string))))
 
-(defn unsupported-value [value]
-  (throw
-   (UnsupportedOperationException.
-    (format  "unsupported type '%s'" (class value)))))
-
 (defn with-name [name value ifemp]
   (if (empty? value)
     (str name ifemp)
     (str name "=" value)))
 
-(defn render [cfg variable]
+(defn expand-variable [variable cfg]
+  "I'm big and bad."
   (let [value    (:value variable)
         max-len  (:maxlen variable 9999)
         name     (:name variable)
@@ -86,34 +82,38 @@
         sep      (if explode? (:sep cfg) ",")
         kvsep    (if explode? "="        ",")
         encode  (:allow cfg)]
-    (cond
-     (nil? value)        nil
-     (string? value)     (if named?
-                           (with-name name (encode (truncate value max-len)) ifemp)
-                           (encode (truncate value max-len)))
-     
-     (number? value)     (if named?
-                           (with-name name (encode (truncate (str value) max-len)) ifemp)
-                           (encode (truncate (str value) max-len)))
-     (map? value)       (if named?  
-                          (if explode?
-                            (render-map sep kvsep value encode)
-                            (str name "=" (render-map sep kvsep value encode)))
-                          (render-map sep kvsep value encode))
-     (sequential? value) (if named?
-                           (if explode?
-                             (join sep (map #(str name "=" (encode %)) value))
-                             (str name "=" (join sep (map encode value))))
-                           (join sep (map encode value)))
-     :else               (unsupported-value value))))
+  (cond
+   (nil? value)        nil
+   (string? value)     (if named?
+                         (with-name name (encode (truncate value max-len)) ifemp)
+                         (encode (truncate value max-len)))
+   (number? value)     (if named?
+                         (with-name name (encode (truncate (str value) max-len)) ifemp)
+                         (encode (truncate (str value) max-len)))
+   (map? value)       (if named?  
+                        (if explode?
+                          (render-map sep kvsep value encode)
+                          (str name "=" (render-map sep kvsep value encode)))
+                        (render-map sep kvsep value encode))
+   (sequential? value) (if named?
+                         (if explode?
+                           (join sep (map #(str name "=" (encode %)) value))
+                           (str name "=" (join sep (map encode value))))
+                         (join sep (map encode value)))
+   :else                (throw
+                         (UnsupportedOperationException.
+                          (format  "unsupported type '%s'" (class value)))))))
 
 (defn value-of [variable variables]
   (if (:value variable)
     variable
     (assoc variable :value ((keyword (:name variable)) variables))))
 
-(defn expander [cfg part variables]
-  (map #(render cfg %) (map #(value-of % variables) (:vars part))))
+(defn resolve-variables [part variables]
+  (map #(value-of % variables) (:vars part)))
+
+(defn expand-variables [part variables cfg]
+  (map #(expand-variable % cfg) (resolve-variables part variables)))
 
 ;; RFC 6570
 ;; Appendix A
@@ -138,4 +138,4 @@
     (join-with-prefix
       (:first cfg)
       (:sep cfg)
-      (expander cfg part variables))))
+      (expand-variables part variables cfg))))
