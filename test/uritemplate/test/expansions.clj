@@ -33,16 +33,6 @@
   (is (= "hello" (urlencode-reserved "hello")))
   (is (= "hello%20world!" (urlencode-reserved "hello world!"))))
 
-(deftest render-test
-  (is (= "1,2,3" (render "," '(1 2 3) identity false 4)))
-  (is (= "foo" (render "" "foo" identity false 3))))
-
-(deftest name-render-test
-  (is (= "list=foo;list=bar"
-         (name-render ";" "" "list" ["foo", "bar"] true 200)))
-  (is (= "list=foo;list=bar"
-         (name-render ";" "" "list" ["foo", "bar"] true 200))))
-
 (deftest truncate-test
   (is (= "" (truncate "" 0)))
   (is (= "" (truncate "" 1)))

@@ -54,12 +54,13 @@
       ""
       (str prefix (join sep filtered-coll)))))
 
-(defn kv [kvsep [key value] urlencoder]
-  (str (name key) kvsep (urlencoder value)))
+(defn kv [kvsep [key value] encoder]
+  (str (name key) kvsep (encoder value)))
 
-(defn render-map [sep kvsep m urlencoder]
+;; FIXME: sorting keys in map in order to have a predicible iteration order 
+(defn render-map [sep kvsep m encoder]
   "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
-  (join sep (map #(kv kvsep % urlencoder) (seq (sort m))))) ;; FIXME: sort keys in map in order to have a predicible iteration order 
+  (join sep (map #(kv kvsep % encoder) (seq (sort m)))))
 
 (defn truncate [string len]
   "Make sure string does not exceed len."
@@ -70,60 +71,49 @@
    (UnsupportedOperationException.
     (format  "unsupported type '%s'" (class value)))))
 
-;; FIXME: too many parameters
-(defn render [wanted_sep value urlencoder explode? max-len]
-  (let [sep    (if explode? wanted_sep ",")
-        kvsep  (if explode? "="        ",")]
-    (cond
-     (nil? value)        nil
-     (string? value)     (urlencoder (truncate value max-len))
-     (number? value)     (urlencoder (truncate (str value) max-len))
-     (map? value)        (render-map sep kvsep value urlencoder)
-     (sequential? value) (join sep (map urlencoder value))
-     :else               (unsupported-value value))))
-
-(defn value-of [variable variables]
-  (if (:value variable)
-    (:value variable)
-    ((keyword (:name variable)) variables)))
-
-(defn expander [sep part variables urlencoder]
-  (map #(render sep (:value %) urlencoder (:explode %) (:maxlen % 9999))
-       (map #(assoc % :value (value-of % variables))
-            (:vars part))))
-
 (defn with-name [name value ifemp]
   (if (empty? value)
     (str name ifemp)
     (str name "=" value)))
 
-;; FIXME: too many parameters
-(defn name-render [wanted_sep ifemp name value explode? max-len]
-  (let [sep    (if explode? wanted_sep ",")
-        kvsep  (if explode? "="        ",")]
+(defn render [cfg variable]
+  (let [value    (:value variable)
+        max-len  (:maxlen variable 9999)
+        name     (:name variable)
+        ifemp    (:ifemp cfg)
+        explode? (:explode variable)
+        named?   (:named cfg)
+        sep      (if explode? (:sep cfg) ",")
+        kvsep    (if explode? "="        ",")
+        encode  (:allow cfg)]
     (cond
      (nil? value)        nil
-     (string? value)        (with-name name (urlencode (truncate value max-len)) ifemp)
-     (number? value)     (with-name name (urlencode (truncate (str value) max-len)) ifemp)
-     (map? value)        (if explode?
-                           (render-map sep kvsep value urlencode)
-                           (str name "=" (render-map sep kvsep value urlencode)))
-     (sequential? value) (if explode?
-                           (join sep (map #(str name "=" (urlencode %)) value))
-                           (str name "=" (join sep (map urlencode value))))
+     (string? value)     (if named?
+                           (with-name name (encode (truncate value max-len)) ifemp)
+                           (encode (truncate value max-len)))
+     
+     (number? value)     (if named?
+                           (with-name name (encode (truncate (str value) max-len)) ifemp)
+                           (encode (truncate (str value) max-len)))
+     (map? value)       (if named?  
+                          (if explode?
+                            (render-map sep kvsep value encode)
+                            (str name "=" (render-map sep kvsep value encode)))
+                          (render-map sep kvsep value encode))
+     (sequential? value) (if named?
+                           (if explode?
+                             (join sep (map #(str name "=" (encode %)) value))
+                             (str name "=" (join sep (map encode value))))
+                           (join sep (map encode value)))
      :else               (unsupported-value value))))
 
-(defn name-expander [sep ifemp part variables]
-  (map #(name-render
-         sep
-         ifemp
-         (:name %)
-         (value-of % variables)
-         (:explode %)
-         (:maxlen % 9999)
-         )
-       (:vars part)))
+(defn value-of [variable variables]
+  (if (:value variable)
+    variable
+    (assoc variable :value ((keyword (:name variable)) variables))))
 
+(defn expander [cfg part variables]
+  (map #(render cfg %) (map #(value-of % variables) (:vars part))))
 
 ;; RFC 6570
 ;; Appendix A
@@ -148,6 +138,4 @@
     (join-with-prefix
       (:first cfg)
       (:sep cfg)
-      (if (:named cfg)
-        (name-expander (:sep cfg) (:ifemp cfg) part variables)
-        (expander (:sep cfg) part variables (:allow cfg))))))
+      (expander cfg part variables))))
