@@ -54,13 +54,8 @@
       ""
       (str prefix (join sep filtered-coll)))))
 
-(defn keyword-aware-str [value]
-  (if (keyword? value)
-    (apply str (rest (str value)))
-    (str value)))
-
 (defn kv [kvsep [key value] urlencoder]
-  (str (keyword-aware-str key) kvsep (urlencoder value)))
+  (str (name key) kvsep (urlencoder value)))
 
 (defn render-map [sep kvsep m urlencoder]
   "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
