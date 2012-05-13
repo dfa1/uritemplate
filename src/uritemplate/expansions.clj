@@ -64,7 +64,7 @@
 
 (defn render-map [sep kvsep m urlencoder]
   "(str k1 kvsep (urlencoder v1) sep k2 kvsep (urlencoder v2) sep ...)"
-  (join sep (map #(kv kvsep % urlencoder) (seq (sort m)))))
+  (join sep (map #(kv kvsep % urlencoder) (seq (sort m))))) ;; FIXME: sort keys in map in order to have a predicible iteration order 
 
 (defn truncate [string len]
   "Make sure string does not exceed len."
