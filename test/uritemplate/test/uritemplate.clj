@@ -21,7 +21,7 @@
   (is (= ["{/path}"] (tokenize "{/path}"))))
 
 (deftest parse-token-test
-  (is (= {:type :literal :value "foo"} (parse-token "foo")))
+  (is (= {:type :literal :vars [{:value "foo"}]} (parse-token "foo")))
   (is (= {:type :simple :vars []} (parse-token "{}")))
   (is (= {:type :simple :vars [{:name "foo"}]} (parse-token "{foo}"))))
 
@@ -42,7 +42,7 @@
   (is (= "foo123" (parse-varname (seq "foo123")))))
 
 (deftest literal-test
-  (is (= {:type :literal :value "http://example.com"}
+  (is (= {:type :literal :vars [{:value "http://example.com"}]}
          (parse-token "http://example.com"))))
 
 (deftest simple-expression-test

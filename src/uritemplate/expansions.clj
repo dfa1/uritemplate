@@ -83,12 +83,14 @@
      :else               (unsupported-value value))))
 
 (defn value-of [variable variables]
-  (let [name (keyword (:name variable))]
-    (name variables)))
+  (if (:value variable)
+    (:value variable)
+    ((keyword (:name variable)) variables)))
 
 (defn expander [sep part variables urlencoder]
   (map #(render sep (:value %) urlencoder (:explode %) (:maxlen % 9999))
-       (map #(assoc % :value (value-of % variables)) (:vars part))))
+       (map #(assoc % :value (value-of % variables))
+            (:vars part))))
 
 (defn with-name [name value ifemp]
   (if (empty? value)
@@ -122,60 +124,30 @@
          )
        (:vars part)))
 
+
 ;; RFC 6570
 ;; Appendix A
-;;
-;; .------------------------------------------------------------------.
-;; |          NUL     +      .       /       ;      ?      &      #   |
-;; |------------------------------------------------------------------|
-;; | first |  ""     ""     "."     "/"     ";"    "?"    "&"    "#"  |
-;; | sep   |  ","    ","    "."     "/"     ";"    "&"    "&"    ","  |
-;; | named | false  false  false   false   true   true   true   false |
-;; | ifemp |  ""     ""     ""      ""      ""     "="    "="    ""   |
-;; | allow |   U     U+R     U       U       U      U      U     U+R  |
-;; `------------------------------------------------------------------'
-(defmulti expand :type)
+(def N str)
+(def U urlencode)
+(def U+R urlencode-reserved)
+(def expanders
+  {
+   :literal  { :first ""  :sep ""  :named false :ifemp ""  :allow N   }
+   :simple   { :first ""  :sep "," :named false :ifemp ""  :allow U   }
+   :reserved { :first ""  :sep "," :named false :ifemp ""  :allow U+R }
+   :fragment { :first "#" :sep "," :named false :ifemp ""  :allow U+R }
+   :dot      { :first "." :sep "." :named false :ifemp ""  :allow U   }
+   :path     { :first "/" :sep "/" :named false :ifemp ""  :allow U   }
+   :param    { :first ";" :sep ";" :named true  :ifemp ""  :allow U   }
+   :form     { :first "?" :sep "&" :named true  :ifemp "=" :allow U   }
+   :formcont { :first "&" :sep "&" :named true  :ifemp "=" :allow U   }
+   })
 
-(defmethod expand :literal [part variables]
-  "Literal expansion."
-  (:value part))
-
-(defmethod expand :simple [part variables]
-  "Simple string expansion. See NUL in Appendix A."
-  (let [sep ","]
-    (join sep (remove empty? (expander sep part variables urlencode)))))
-
-(defmethod expand :reserved [part variables]
-  "Reserved expansion. See + in Appendix A."
-  (let [sep ","]
-    (join sep (expander sep part variables urlencode-reserved))))
-
-(defmethod expand :fragment [part variables]
-  "Fragment expansion. See # in Appendix A."
-  (let [first "#" sep "," urlencoder urlencode-reserved]
-    (join-with-prefix first sep (expander sep part variables urlencoder))))
-
-(defmethod expand :dot [part variables]
-  "Dot expansion. See . in Appendix A."
-  (let [first "." sep "." urlencoder urlencode]
-    (join-with-prefix first sep (expander sep part variables urlencoder))))
-
-(defmethod expand :path [part variables]
-  "Path segment expansion. See / in Appendix A."
-  (let [first "/" sep "/" urlencoder urlencode]
-    (join-with-prefix first sep (expander sep part variables urlencoder))))
-
-(defmethod expand :pathparam [part variables]
-  "Path parameter expansion. See ; in Appendix A."
-  (let [first ";" sep ";" ifemp ""]
-    (join-with-prefix first sep (name-expander sep ifemp part variables))))
-
-(defmethod expand :form [part variables]
-  "Form expansion. See ? in Appendix A."
-  (let [first "?" sep "&" ifemp "="]
-    (join-with-prefix first sep (name-expander sep ifemp part variables))))
-
-(defmethod expand :formcont [part variables]
-  "Form continuation expansion. See & in Appendix A."
-  (let [first "&" sep "&" ifemp "="]
-    (join-with-prefix first sep (name-expander sep ifemp part variables))))
+(defn expand [part variables]
+  (let [cfg ((:type part) expanders)]
+    (join-with-prefix
+      (:first cfg)
+      (:sep cfg)
+      (if (:named cfg)
+        (name-expander (:sep cfg) (:ifemp cfg) part variables)
+        (expander (:sep cfg) part variables (:allow cfg))))))

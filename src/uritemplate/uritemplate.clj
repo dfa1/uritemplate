@@ -64,14 +64,14 @@
     {:type type :vars (vec variables)}))
 
 (defn parse-literal [literal]
-  {:type :literal :value (apply str literal)})
+  {:type :literal :vars [{:value (apply str literal)}]})
 
 (def operator->type { 
    \+     :reserved 
    \#     :fragment 
    \.     :dot       
    \/     :path
-   \;     :pathparam 
+   \;     :param 
    \?     :form      
    \&     :formcont
    })
