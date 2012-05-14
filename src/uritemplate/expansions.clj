@@ -31,7 +31,7 @@
   (apply str (map #(pct-encode-but pred %) string)))
 
 (defn in? [& colls]
-  "Factory (or (contains? coll1 key) (contains? coll2 key) ..etc)."
+  "Factory for (or (contains? coll1 key) (contains? coll2 key) ..etc)."
   (fn [key]
     (some #(contains? % key) colls)))
 
@@ -63,7 +63,7 @@
   (join sep (map #(kv kvsep % encoder) (seq (sort m)))))
 
 (defn truncate-to [max-len]
-  "Return a function that truncates strings to the specified max-len."
+  "Factory for a function that truncates strings to the specified max-len."
   (fn [string]
     (let [stream (seq string)
           len (min max-len (count stream))]
@@ -111,6 +111,7 @@
                           (format  "unsupported type '%s'" (class value)))))))
 
 (defn value-of [variable variables]
+  "Join on variable name with variables."
   (if (:value variable)
     variable
     (assoc variable :value ((keyword (:name variable)) variables))))
@@ -121,23 +122,19 @@
 (defn expand-variables [part variables cfg]
   (map #(expand-variable % cfg) (resolve-variables part variables)))
 
-;; RFC 6570
-;; Appendix A
-(def N str)
-(def U urlencode)
-(def U+R urlencode-reserved)
 (def expanders
-   {
-    :literal  { :first ""  :sep ""  :named false :ifemp ""  :allow N   }
-    :simple   { :first ""  :sep "," :named false :ifemp ""  :allow U   }
-    :reserved { :first ""  :sep "," :named false :ifemp ""  :allow U+R }
-    :fragment { :first "#" :sep "," :named false :ifemp ""  :allow U+R }
-    :dot      { :first "." :sep "." :named false :ifemp ""  :allow U   }
-    :path     { :first "/" :sep "/" :named false :ifemp ""  :allow U   }
-    :param    { :first ";" :sep ";" :named true  :ifemp ""  :allow U   }
-    :form     { :first "?" :sep "&" :named true  :ifemp "=" :allow U   }
-    :formcont { :first "&" :sep "&" :named true  :ifemp "=" :allow U   }
-    })
+  "As defined by Appending A of RFC 6570"
+  (let [N str U urlencode U+R urlencode-reserved] {
+     :literal  { :first ""  :sep ""  :named false :ifemp ""  :allow N   }
+     :simple   { :first ""  :sep "," :named false :ifemp ""  :allow U   }
+     :reserved { :first ""  :sep "," :named false :ifemp ""  :allow U+R }
+     :fragment { :first "#" :sep "," :named false :ifemp ""  :allow U+R }
+     :dot      { :first "." :sep "." :named false :ifemp ""  :allow U   }
+     :path     { :first "/" :sep "/" :named false :ifemp ""  :allow U   }
+     :param    { :first ";" :sep ";" :named true  :ifemp ""  :allow U   }
+     :form     { :first "?" :sep "&" :named true  :ifemp "=" :allow U   }
+     :formcont { :first "&" :sep "&" :named true  :ifemp "=" :allow U   }
+     }))
 
 (defn expand [part variables]
   (let [cfg ((:type part) expanders)]
