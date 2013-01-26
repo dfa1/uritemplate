@@ -8,7 +8,6 @@
         expected (second testcase)
         compiled-template (uritemplate template)
         got (compiled-template variables)]
-    (println (format "testing template '%s' is '%s'" template expected)) 
     (is (= expected got)
         (format "template level %s: '%s', expected: '%s', got '%s'" level template expected got))))
 
@@ -19,9 +18,9 @@
 
 (defn- load-specs []
   (clojure.java.io/reader
-   (clojure.java.io/resource "uritemplate/test/specs.json")))
+    (clojure.java.io/resource "uritemplate/test/specs.json")))
 
 (deftest rfc-specs
   (doall
-   (map run-testcases-by-level
+    (map run-testcases-by-level
         (vals (read-json (load-specs))))))
