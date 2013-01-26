@@ -8,17 +8,17 @@
   (is (= [\a \b] (char-range \a \b))))
 
 (deftest join-test
-  (is (= "" (join "," [])))
-  (is (= "a" (join "," ["a"])))
+  (is (= ""    (join "," [])))
+  (is (= "a"   (join "," ["a"])))
   (is (= "a,b" (join "," ["a","b"]))))
 
 (deftest join-with-prefix-test
-  (is (= "" (join-with-prefix "/" "," [])))
-  (is (= "" (join-with-prefix "/" "," [nil])))
-  (is (= "/" (join-with-prefix "/" "," [""])))
-  (is (= "/a" (join-with-prefix "/" "," [nil, "a"])))
-  (is (= "/a" (join-with-prefix "/" "," ["a", nil])))
-  (is (= "/a" (join-with-prefix "/" "," ["a"])))
+  (is (= ""     (join-with-prefix "/" "," [])))
+  (is (= ""     (join-with-prefix "/" "," [nil])))
+  (is (= "/"    (join-with-prefix "/" "," [""])))
+  (is (= "/a"   (join-with-prefix "/" "," [nil, "a"])))
+  (is (= "/a"   (join-with-prefix "/" "," ["a", nil])))
+  (is (= "/a"   (join-with-prefix "/" "," ["a"])))
   (is (= "/a,b" (join-with-prefix "/" "," ["a","b"]))))
 
 (deftest pct-encode-test
@@ -26,7 +26,7 @@
   (is (= "%2F" (pct-encode \/))))
 
 (deftest urlencode-test
-  (is (= "hello" (urlencode "hello")))
+  (is (= "hello"            (urlencode "hello")))
   (is (= "hello%20world%21" (urlencode "hello world!"))))
 
 (deftest urlencode-reserved-test
