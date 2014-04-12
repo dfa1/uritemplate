@@ -1,15 +1,14 @@
 # uritemplate
 
-Creates uritemplates according to RFC 6570.
- 
+Clojure implementation of the URI Template (RFC 6570), level 4 complaint.
+
 ## Usage
 
-- uritemplate: 
-      
-    (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
-      (bitbucket {:user "dfa" :project "uritemplate"})) ; -> http://bitbucket.org/dfa/uritemplate
+user=> (let [bitbucket (uritemplate "http://bitbucket.org/{user}/{project}")]
+  (bitbucket {:user "dfa" :project "uritemplate"}))
+http://bitbucket.org/dfa/uritemplate
+user=>
 
-     	    
 ## Todo
 
 - improve error reporting:
@@ -28,6 +27,6 @@ http://static.springsource.org/spring/docs/3.0.x/javadoc-api/org/springframework
 
 ## License
 
-Copyright (C) 2011-2012 Davide Angelocola
+Copyright (C) 2011-2014 Davide Angelocola
 
 Distributed under the Eclipse Public License, the same as Clojure.
