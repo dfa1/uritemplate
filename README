@@ -1,6 +1,6 @@
 # uritemplate
 
-Clojure implementation of the URI Template (RFC 6570), level 4 complaint.
+Clojure implementation of the URI Template (RFC 6570), level 4 compliant.
 
 ## Usage
 
