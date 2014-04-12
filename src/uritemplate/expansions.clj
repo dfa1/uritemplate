@@ -94,7 +94,7 @@
                            (with-name name expanded ifemp)
                            expanded))
    (map? value)        (let [expanded (expand-map sep kvsep value encode)]
-                         (if named?  
+                         (if named?
                            (if explode?
                              expanded
                              (str name "=" expanded))

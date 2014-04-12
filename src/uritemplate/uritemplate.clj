@@ -51,7 +51,7 @@
    (some colon? varspec)  (parse-varspec-prefix  varspec)
    :else                  (parse-varspec-simple  varspec)))
 
-;; sec 2.3 
+;; sec 2.3
 ;; variable-list =  varspec *( "," varspec )
 ;; varspec       =  varname [ modifier-level4 ]
 ;; varname       =  varchar *( ["."] varchar )
@@ -66,13 +66,13 @@
 (defn parse-literal [literal]
   {:type :literal :vars [{:value (apply str literal)}]})
 
-(def operator->type { 
-   \+     :reserved 
-   \#     :fragment 
-   \.     :dot       
+(def operator->type {
+   \+     :reserved
+   \#     :fragment
+   \.     :dot
    \/     :path
-   \;     :param 
-   \?     :form      
+   \;     :param
+   \?     :form
    \&     :formcont
    })
 
@@ -83,7 +83,7 @@ operator character."
     (if type
       [type    (rest variable-list)]
       [:simple variable-list])))
-      
+
 (defn- drop-braces [expression]
   "{foo,bar:1} -> foo,bar:1"
   (rest (butlast expression)))
