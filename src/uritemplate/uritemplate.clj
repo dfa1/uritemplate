@@ -13,9 +13,9 @@
   (remove #(every? pred %) (partition-by pred coll)))
 
 (defn tokenize [template]
-  (re-seq #"\{[^\{]+\}|[^{}]+" template)) ;; FIXME: try to avoid re-seq here
+  (re-seq #"\{[^\{]+\}|[^{}]+" template))
 
-;; sec 2.3, FIXME: can accept invalid pct-encoded
+;; sec 2.3
 (def varchar? (set (concat
                     (char-range \A \Z)
                     (char-range \a \z)
