@@ -57,9 +57,7 @@
 (defn kv [kvsep [key value] encoder]
   (str (name key) kvsep (encoder value)))
 
-;; FIXME: sorting keys in map in order to have a predicible iteration order 
 (defn expand-map [sep kvsep m encoder]
-  "(str k1 kvsep (encoder v1) sep k2 kvsep (encoder v2) sep ...)"
   (join sep (map #(kv kvsep % encoder) (seq (sort m)))))
 
 (defn truncate-to [max-len]
